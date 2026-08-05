@@ -1,0 +1,15 @@
+fare i nemici
+fare gli oggetti
+fare il punteggio
+fare il tempo
+fare la lista di livelli che si salvano con le matrici
+
+animazione titolo
+cornice più carina per il gioco e cornice del menu
+migliorare l'estetica generale, aggiungendo colori e blocchi per i muri
+rimuovi override da enemy.hpp
+crea il file e la classe per settare la BFS
+
+Cambiare punti spawn nemici
+fixare i bottoni che diventano grandi e piccoli quando schiacciati
+fare le vite
