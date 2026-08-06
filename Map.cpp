@@ -42,7 +42,7 @@ void Map::initmap(int livelloReale) {
     for (int i = 0; i < righe; i++) {
         for (int j = 0; j < colonne; j++) {
             map[i][j] = 0;
-            oggettiNascosti[i][j] = 0;
+            oggettiNascosti[i][j] = 0; //matrice per gli oggetti nascosti
         }
     }
 
@@ -74,7 +74,7 @@ void Map::initmap(int livelloReale) {
     }
 
     // 5. Piazza i muri distruttibili in modo casuale
-    int numDaCreare = (NLivello * 3 + 100);
+    int numDaCreare = (NLivello * 3 + 75);
     if (numDaCreare > NumeroMuriDis) {
         numDaCreare = NumeroMuriDis;
     }
@@ -135,6 +135,9 @@ void Map::initmap(int livelloReale) {
     if (NLivello > 1) {
         map[2][2] = 4;  
     }
+
+        // Porta livello successivo (utile per debugging)
+        map[3][2] = 3;  
 
 
     // 8. NASCONDI I POWERUPS

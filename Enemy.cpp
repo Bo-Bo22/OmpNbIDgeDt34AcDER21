@@ -28,9 +28,9 @@ void Enemy::spawna_casuale(Map &Mappa, Enemy** altri, int n) {
     do {
         occupato = false;
         
-        // rand() % (max - min + 1) + min calcola un punto casuale escludendo i bordi esterni
-        YLoc = rand() % (h - 2) + 1;
-        XLoc = rand() % (w - 2) + 1;
+        // rand() % (max - min + 1) + min calcola un punto casuale in un quadrato 5x5 al centro della mappa
+        YLoc = rand() % 7 + (h / 2) - 5 ; // Centra verticalmente il range di spawn
+        XLoc = rand() % 7 + (w / 2) - 5 ; // Centra orizzontalmente il range di spawn
         
         // Ciclo for per controllare che la nuova posizione non si sovrapponga a un altro nemico esistente
         for(int i = 0; i < n; i++) {

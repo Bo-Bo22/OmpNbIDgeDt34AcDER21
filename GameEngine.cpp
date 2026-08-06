@@ -79,7 +79,7 @@ void GameEngine::generateEnemies() {
     }
     
     // 2. CALCOLO NUMERO NEMICI
-    numeroNemici = 1 + ((currentMap->GetLvlN()) / 2);
+    numeroNemici = 3 + ((currentMap->GetLvlN()) / 2);
     if (numeroNemici > MAX_NEMICI) {
         numeroNemici = MAX_NEMICI;
     }
