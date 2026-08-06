@@ -11,5 +11,7 @@ rimuovi override da enemy.hpp
 crea il file e la classe per settare la BFS
 
 
-fixare i bottoni che diventano grandi e piccoli quando schiacciati
 fare le vite
+
+
+Leggi bene le modifiche ai bottoni per quando cambiano dimensione da schiacciati

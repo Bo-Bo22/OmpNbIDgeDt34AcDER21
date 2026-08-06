@@ -1,4 +1,5 @@
 #include "Button.hpp"
+#include <cstring>
 
 using namespace std; //per non usare std:: prima delle funzioni della libreria cstring
 
@@ -39,34 +40,83 @@ void Button::tick() {
             draw();
             break;
 
-        //Stato "premuto", il bottone si allarga e lampeggia
+        //Stato "premuto", si allarga e si riduce in un effetto di "pressione"
         case ButtonState::PRESSING:
             blinkOn = false;
             blinkTick = 0;
-            for(int a = 0; a < 10 ; a++) {
-                blinkTick++;
-                width = 20 + blinkTick % 3; // Aumenta la larghezza del bottone
+            
+            // Riduciamo a 6 frame per un "click" più rapido e scattante
+            for(int a = 0; a < 6 ; a++) {
+                
+                int espX = 0; 
+                int espY = 0; // DISATTIVATO: Non tocchiamo l'altezza per evitare l'effetto "gigante"
+                
+                // =========================================================
+                // LOGICA DELL'ANIMAZIONE (Solo orizzontale)
+                // =========================================================
+                if (a == 0 || a == 5) {
+                    // Frame iniziale e finale: Dimensione originale
+                    espX = 0; 
+                } 
+                else if (a == 1 || a == 4) {
+                    // Transizione: +1 carattere a destra e +1 a sinistra
+                    espX = 1; 
+                } 
+                else {
+                    // Momento di massima pressione (frame 2 e 3): +2 caratteri per lato
+                    espX = 2; 
+                }
 
-                // Distruggo la vecchia finestra per evitare sovrapposizioni
+                // =========================================================
+                // CALCOLO DIMENSIONI E COORDINATE
+                // =========================================================
+                int altezzaAttuale = 3 + (espY * 2); // Rimane sempre 3
+                int larghezzaAttuale = 20 + (espX * 2); // Varia da 20 a 24 massimo
+
+                int coordinataY = y - espY; // Rimane sempre y
+                int coordinataX = x - espX; // Si adatta per mantenere il centro
+
+                // Pulisce il frame precedente
+                wclear(btnWin);
+                wrefresh(btnWin);
                 delwin(btnWin);
                 
-                // Creo la nuova finestra allargata e ridisegnala
-                btnWin = newwin(3, width, y, x);
+                // Disegna il frame attuale
+                btnWin = newwin(altezzaAttuale, larghezzaAttuale, coordinataY, coordinataX);
                 draw();
                 
-                // Rallento il ciclo di 15 millisecondi per rendere l'animazione visibile
-                napms(15);
+                // Delay tra un frame e l'altro durante l'animazione (25 millisecondi)
+                napms(25); 
             }
+            
+            // =========================================================
+            // IL DELAY FINALE (PAUSA DI RILASCIO)
+            // =========================================================
+            // L'animazione è finita, il bottone è tornato alla dimensione normale.
+            // Fermiamo il gioco per 150 millisecondi (poco più di un decimo di secondo)
+            // per far "vedere" il bottone rilasciato prima che il menu si chiuda!
+            napms(150);
+            
             break;
     }
 }
 
 // Disegna il bottone in base al suo stato
 void Button::draw() {
+    
+    // 1. Chiediamo a ncurses le dimensioni ATTUALI della finestra in questo esatto frame
+    int h, w;
+    getmaxyx(btnWin, h, w);
+    
+    // 2. Calcoliamo il centro matematico
+    int textY = h / 2;
+    int textX = (w - strlen(label)) / 2; 
+
     switch(state) {
         case ButtonState::NORMAL:
             box(btnWin, 0, 0);
-            mvwprintw(btnWin, y_str, x_str, "%s", label);
+            // Sostituiamo y_str e x_str con le nostre coordinate dinamiche
+            mvwprintw(btnWin, textY, textX, "%s", label);
             wrefresh(btnWin);
             break;
             
@@ -74,21 +124,23 @@ void Button::draw() {
         case ButtonState::SELECTED:
             if (blinkOn) {
                 box(btnWin, 0, 0);
-                mvwprintw(btnWin, y_str, x_str, "%s", label);
+                mvwprintw(btnWin, textY, textX, "%s", label);
                 wrefresh(btnWin);
             }
             else {
                 wattron(btnWin, COLOR_PAIR(2));
                 box(btnWin, 0, 0);
-                mvwprintw(btnWin, y_str, x_str, "%s", label);
+                mvwprintw(btnWin, textY, textX, "%s", label);
+                // È buona prassi spegnere l'attributo colore PRIMA del refresh!
+                wattroff(btnWin, COLOR_PAIR(2)); 
                 wrefresh(btnWin);
-                wattroff(btnWin, COLOR_PAIR(2));
             }
             break;
             
         case ButtonState::PRESSING:
+            // Anche durante l'animazione, il testo ricalcolerà il centro ad ogni frame
             box(btnWin, 0, 0);
-            mvwprintw(btnWin, y_str, x_str, "%s", label);
+            mvwprintw(btnWin, textY, textX, "%s", label);
             wrefresh(btnWin);
             break;
     }
