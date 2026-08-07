@@ -14,6 +14,7 @@ Player::Player(WINDOW* win, int y, int x, char c) {
     ReturnToMenu = false;   
     
     Life = 3; // Inizializziamo le vite del giocatore
+    Score = 0; // Inizializziamo lo score del giocatore
 }
 
 // Aggiorna la finestra del giocatore e i suoi limiti massimi
@@ -238,3 +239,10 @@ int Player::LifeUp(){
 
 int Player::getLife(){
      return Life; }
+
+void Player::addScore(int points) { 
+    Score += points; 
+}
+int Player::getScore() { 
+    return Score; 
+}

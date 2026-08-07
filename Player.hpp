@@ -15,6 +15,7 @@ protected:
     bool PrevLevel;
     bool ReturnToMenu;
     int Life;
+    int Score;
 
 public:
     Player(WINDOW* win, int y, int x, char c);
@@ -44,5 +45,8 @@ public:
     void setWindow(WINDOW* win); 
     void erase(Map &Mappa); 
     void redrawPreviousCell(Map &Mappa); 
+
+    void addScore(int points);
+    int getScore();
 };
 #endif

@@ -90,10 +90,14 @@ bool Bomb::update(Map &Mappa, Player &Pl, Enemy** En, int n_nemici) {
                     isHit = true;
                 }
 
-                // Danni della fiamma sui Nemici
-                for (int j = 0; j < n_nemici; j++){
-                    if(En[j]->getX() == tX && En[j]->getY() == tY){
-                        En[j]->kill(Mappa);
+                    // Danni della fiamma sui Nemici
+                    for (int j = 0; j < n_nemici; j++){
+                        if(En[j]->getX() == tX && En[j]->getY() == tY){
+                            // Controlliamo che sia vivo per non fare punti infiniti!
+                        if (En[j]->isAlive()) { 
+                            En[j]->kill(Mappa);
+                            Pl.addScore(500); // <-- 500 PUNTI PER IL NEMICO
+                        }
                     }
                 }
             }
@@ -128,6 +132,8 @@ bool Bomb::update(Map &Mappa, Player &Pl, Enemy** En, int n_nemici) {
                             
                             // Trasformiamo il muro esattamente in quello che nascondeva
                             Mappa.setPos(tY, tX, sorpresa);
+
+                            Pl.addScore(50); // Aggiungiamo 50 punti per ogni muro distrutto
                         }
                         // ----------------------------------------------------
                         
@@ -154,8 +160,6 @@ void Bomb::forceExplode(){
     exploding = true;
     explod_time = std::chrono::steady_clock::now();
 }
-
-int Bomb::getScore() const { return score; }
 
 bool Bomb::isActive(){
     return active;

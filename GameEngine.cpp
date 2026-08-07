@@ -105,11 +105,15 @@ void GameEngine::drawHUD() {
     // Ci posizioniamo 2 righe sopra la mappa
     int hudY = startY - 2;
     
-    // Stampiamo la stringa formattata
-    mvprintw(hudY, startX, " VITE: %d   |   LIVELLO: %d   |   BOMBE: %d ", 
+    // Pulisce l'intera riga prima di scrivere, per evitare artefatti grafici (glitch visivi)
+    move(hudY, 0);
+    clrtoeol();
+    
+    // Stampiamo la stringa formattata con l'aggiunta dello SCORE (formattato a 6 cifre con gli zeri)
+    mvprintw(hudY, startX, "SCORE: %07d  | VITE: %d  | LIVELLO: %d", 
+             p->getScore(),
              p->getLife(), 
-             currentMap->GetLvlN(), 
-             MAX_BOMBE);
+             currentMap->GetLvlN());
              
     refresh(); // Aggiorna lo schermo standard (stdscr) su cui è disegnato l'HUD
 }

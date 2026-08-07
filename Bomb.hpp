@@ -18,7 +18,6 @@ protected:
 
     int xLoc, yLoc;
     int XMax, YMax;
-    int score;
 
     bool active; //questi booleani gestiscono lo stato della bomba. serviranno tutti in update.
     bool visible;
@@ -48,8 +47,6 @@ public:
 
     void forceExplode();
     bool isExploding();
-
-    int getScore() const;
 
     void display();
 
