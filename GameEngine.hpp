@@ -42,6 +42,8 @@ public:
     void run(); // Il ciclo principale
 
     int getNumeroNemici() { return numeroNemici; }
+
+    void showGameOverScreen();
     
     // Invece di restituire tutto l'array, creiamo un metodo che restituisce il singolo nemico
     Enemy* getNemico(int indice) { 

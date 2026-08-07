@@ -146,6 +146,28 @@ void GameEngine::resetGameVariables() {
     }
 }
 
+void GameEngine::showGameOverScreen() {
+    // Pulisce brutalmente tutto lo schermo
+    clear(); 
+    
+    // Testi da visualizzare
+    std::string msg = "G A M E   O V E R";
+    std::string subMsg = "Premi un tasto per tornare al Menu...";
+    
+    // Stampa al centro esatto dello schermo terminale
+    mvprintw(yMax / 2 - 1, (xMax - msg.length()) / 2, "%s", msg.c_str());
+    mvprintw(yMax / 2 + 1, (xMax - subMsg.length()) / 2, "%s", subMsg.c_str());
+    
+    refresh();
+    
+    // Si assicura che getch() si blocchi in attesa di un tasto
+    nodelay(stdscr, FALSE); 
+    getch(); 
+    
+    // Ripulisce lo schermo prima di ridare il controllo al MainMenu
+    clear(); 
+}
+
 // Il Game Loop Principale
 void GameEngine::run() {
     while (true) {
@@ -158,7 +180,7 @@ void GameEngine::run() {
                 p->resetPosition();
                 p->resetLevelFlags();
                 setupGameScreen();
-                    generateEnemies();
+                generateEnemies();
                 inGame = true;
                 nodelay(stdscr, TRUE); // Imposta la modalità non bloccante per l'input
             } else {
@@ -172,103 +194,99 @@ void GameEngine::run() {
             if (p->getReturnToMenu()) {
                 p->erase(*currentMap);
                 inGame = false;
-                continue;
+                resetGameVariables(); // Pulisce le vecchie bombe
             }
+            else {
             
-            if (p->ReturnNextLevel()) {
-                p->erase(*currentMap);
-                resetGameVariables(); // <--- 1. Pulisce le vecchie bombe
-                currentMap = &manager.nextLevel(yMax);
-                p->resetPosition();
-                p->resetLevelFlags();
-                setupGameScreen();    // <--- 2. Ridisegna la mappa pulita
-                    generateEnemies();    // <--- 3. Genera i nemici per il nuovo livello
-            }
-            
-            if (p->ReturnPrevLevel()) {
-                p->erase(*currentMap);
-                resetGameVariables(); // <--- 1. Pulisce le vecchie bombe
-                currentMap = &manager.prevLevel();
-                p->resetPosition();
-                p->resetLevelFlags();
-                setupGameScreen();    // <--- 2. Ridisegna la mappa pulita
-                generateEnemies();    // <--- 3. Rigenera i nemici 
-            }
-            
-           
-           // Rendering HUD e Mappa
-            drawHUD();
-            currentMap->refresh();
-            p->display();
-            
-            // Aggiorna e disegna tutti i nemici in vita
-            for (int i = 0; i < numeroNemici; i++) {
-                if (arrayNemici[i] != NULL && arrayNemici[i]->isAlive()) {
-                    arrayNemici[i]->update(*currentMap, *p); 
-                    arrayNemici[i]->display();               
+                if (p->ReturnNextLevel()) {
+                    p->erase(*currentMap);
+                    resetGameVariables(); 
+                    currentMap = &manager.nextLevel(yMax);
+                    p->resetPosition();
+                    p->resetLevelFlags();
+                    setupGameScreen();    
+                    generateEnemies();    
                 }
-            }
-            
-            // --- CONTROLLO COLLISIONI PULITO ---
-            bool isGameOver = checkEnemyCollisions();
-            if (isGameOver) {
-                // IL GIOCATORE HA PERSO
-                p->erase(*currentMap);
-                inGame = false;
                 
-                // Ripristina l'input bloccante per permettere ai menu di funzionare
-                nodelay(stdscr, FALSE); 
+                if (p->ReturnPrevLevel()) {
+                    p->erase(*currentMap);
+                    resetGameVariables(); 
+                    currentMap = &manager.prevLevel();
+                    p->resetPosition();
+                    p->resetLevelFlags();
+                    setupGameScreen();    
+                    generateEnemies();    
+                }
                 
-                // [QUI IN FUTURO CHIAMEREMO LA SCHERMATA DI GAME OVER]
-                continue; // Interrompe il frame attuale e torna all'inizio del while
-            }
-            // -----------------------------------
+                // Rendering HUD e Mappa
+                drawHUD();
+                currentMap->refresh();
+                p->display();
+                
+                // Aggiorna e disegna tutti i nemici in vita
+                for (int i = 0; i < numeroNemici; i++) {
+                    if (arrayNemici[i] != NULL && arrayNemici[i]->isAlive()) {
+                        arrayNemici[i]->update(*currentMap, *p); 
+                        arrayNemici[i]->display();               
+                    }
+                }
+                
+                // --- CONTROLLO COLLISIONI PULITO ---
+                bool isGameOver = checkEnemyCollisions();
+                if (isGameOver) {
+                    // IL GIOCATORE HA PERSO
+                    p->erase(*currentMap);
+                    inGame = false;
+                    
+                    // Ripristina l'input bloccante per permettere ai menu di funzionare
+                    nodelay(stdscr, FALSE); 
+                    
+                    showGameOverScreen();
+                    resetGameVariables(); // Pulisce le vecchie bombe
 
-            updateAndDrawBombs();
-            wrefresh(currentMap->getWin());
-            napms(16); // Rallenta il loop per mantenere circa 60 FPS
-        }
+                }
+                else{
 
-        // ==========================================================
-        // CHECK PROGRESSIONE: NEMICI MORTI E PORTA SEGRETA
-        // ==========================================================
-
-        bool tuttiMorti = false;
-
-        // 1. Usa il getter per il numero dei nemici
-        for (int i = 0; i < getNumeroNemici(); i++) {
+                updateAndDrawBombs();
+                wrefresh(currentMap->getWin());
+                napms(16); // Rallenta il loop per mantenere circa 60 FPS
             
-            // Usa il getter per ottenere il nemico specifico
-            Enemy* nemicoAttuale = getNemico(i);
-            
-            if (nemicoAttuale != NULL && !nemicoAttuale->isAlive()) {
-                tuttiMorti = true; // C'è ancora qualcuno da sconfiggere!
-                break; 
-            }
-        }
+                // ==========================================================
+                // CHECK PROGRESSIONE: NEMICI MORTI E PORTA SEGRETA
+                // ==========================================================
 
-        // 2. Usa i getter per le coordinate della porta
-        int pY = currentMap->getPortaY();
-        int pX = currentMap->getPortaX();
+                bool tuttiMorti = false;
 
-        // Recupera le coordinate del giocatore (adatta i nomi dei getter se i tuoi sono diversi)
-        int playerY = p->getY(); 
-        int playerX = p->getX();
-        int valoreCellaPorta = currentMap->GetPos(pY, pX);
+                // 1. Usa il getter per il numero dei nemici
+                for (int i = 0; i < getNumeroNemici(); i++) {
+                    Enemy* nemicoAttuale = getNemico(i);
+                    if (nemicoAttuale != NULL && !nemicoAttuale->isAlive()) {
+                        tuttiMorti = true; // C'è ancora qualcuno da sconfiggere!
+                        break; 
+                    }
+                }
 
-        // Stampa alla riga 0, colonna 0 dello schermo standard (in alto a sinistra)
-        // I tanti spazi vuoti alla fine servono a "pulire" lo sporco se la stringa si accorcia
-        mvprintw(0, 0, "DEBUG | TuttiMorti: %d | PortaNascosta(Y:%d X:%d Valore:%d) | Player(Y:%d X:%d)       ", 
-                 tuttiMorti, pY, pX, valoreCellaPorta, playerY, playerX);
-                 
-        // Aggiorna lo schermo base per mostrare il testo
-        refresh();
+                // 2. Usa i getter per le coordinate della porta
+                int pY = currentMap->getPortaY();
+                int pX = currentMap->getPortaX();
 
-        // 3. Fai apparire la porta
-        if (tuttiMorti == true && currentMap->GetPos(pY, pX) == 0) {
-            currentMap->setPos(pY, pX, 3);       // Piazza la porta
-            currentMap->RedrawCell(pY, pX);      // Disegnala a schermo
-        }
-        // ==========================================================
-    }
-}
+                int playerY = p->getY(); 
+                int playerX = p->getX();
+                int valoreCellaPorta = currentMap->GetPos(pY, pX);
+
+                mvprintw(0, 0, "DEBUG | TuttiMorti: %d | PortaNascosta(Y:%d X:%d Valore:%d) | Player(Y:%d X:%d)       ", 
+                        tuttiMorti, pY, pX, valoreCellaPorta, playerY, playerX);
+                        
+                refresh();
+
+                // 3. Fai apparire la porta
+                if (tuttiMorti == true && currentMap->GetPos(pY, pX) == 0) {
+                    currentMap->setPos(pY, pX, 3);       // Piazza la porta
+                    currentMap->RedrawCell(pY, pX);      // Disegnala a schermo
+                }
+                // ==========================================================
+                }
+            } // else (Fine logica in-game se non hai premuto ESC)
+        } // else(!inGame)
+    } // while(true) 
+} //run()

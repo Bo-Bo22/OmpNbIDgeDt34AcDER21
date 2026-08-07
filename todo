@@ -2,7 +2,7 @@ fare i nemici
 fare gli oggetti
 fare il punteggio
 fare il tempo
-fare la lista di livelli che si salvano con le matrici
+fare lista livelli menu
 
 animazione titolo
 cornice più carina per il gioco e cornice del menu
@@ -12,6 +12,9 @@ crea il file e la classe per settare la BFS
 
 
 fare le vite
+fixa il continue
+fai lo score
 
 
 Leggi bene le modifiche ai bottoni per quando cambiano dimensione da schiacciati
+Fixa i file hpp controllando che tutte le variabili siano protected e che le funzioni siano public e che non ci siano override
