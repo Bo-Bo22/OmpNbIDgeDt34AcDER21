@@ -2,6 +2,7 @@
 #define GAMEENGINE_HPP
 
 #include <ncurses.h>
+#include <chrono>
 #include "Player.hpp"
 #include "Map.hpp"
 #include "LevelManager.hpp"
@@ -35,6 +36,12 @@ protected:
     void updateAndDrawBombs();
     void resetGameVariables();
     bool checkEnemyCollisions();
+
+    //Variabili per la gestione del tempo di gioco
+    std::chrono::time_point<std::chrono::steady_clock> startTime;
+    bool timerRunning;
+
+    int maxLevelReached; // Variabile per tenere traccia del livello massimo raggiunto
 
 public:
     GameEngine(int y, int x);

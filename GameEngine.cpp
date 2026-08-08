@@ -19,6 +19,9 @@ GameEngine::GameEngine(int y, int x) {
     for (int i = 0; i < MAX_NEMICI; i++) {
         arrayNemici[i] = NULL; 
     }
+
+    timerRunning = false;
+    int maxLevelReached = 1;
 }
 
 // Funzione grafica per disegnare la cornice
@@ -108,14 +111,41 @@ void GameEngine::drawHUD() {
     // Pulisce l'intera riga prima di scrivere, per evitare artefatti grafici (glitch visivi)
     move(hudY, 0);
     clrtoeol();
-    
+            
     // Stampiamo la stringa formattata con l'aggiunta dello SCORE (formattato a 6 cifre con gli zeri)
     mvprintw(hudY, startX, "SCORE: %07d  | VITE: %d  | LIVELLO: %d", 
              p->getScore(),
              p->getLife(), 
              currentMap->GetLvlN());
              
-    refresh(); // Aggiorna lo schermo standard (stdscr) su cui è disegnato l'HUD
+
+    // 2. HUD INFERIORE (tempo)
+    int bottomY = startY + Map::getHeight() + 1; 
+    
+    move(bottomY, 0);
+    clrtoeol(); 
+    
+    int tempoRimanente = 2000; // Valore massimo di partenza
+    
+    if (timerRunning) {
+        auto now = std::chrono::steady_clock::now();
+        int tempoTrascorso = std::chrono::duration_cast<std::chrono::seconds>(now - startTime).count();
+        
+        // Sottraiamo il tempo trascorso dal valore iniziale
+        tempoRimanente -= tempoTrascorso;
+        
+        // Evitiamo che il tempo vada in negativo
+        if (tempoRimanente < 0) {
+            tempoRimanente = 0;
+            // (Opzionale) Qui in futuro potresti far scattare il Game Over
+        }
+    }
+    
+    int timeX = startX + (Map::getWidth() / 2) - 5;
+    
+    mvprintw(bottomY, timeX, " TIME: %d ", tempoRimanente);
+    
+    refresh();
 }
 
 // Controlla se il giocatore tocca un nemico vivo e ne gestisce il danno
@@ -184,12 +214,16 @@ void GameEngine::run() {
             int menuChoice = menu.run(yMax, xMax);
             
             if (menuChoice == 1) { // L'utente sceglie GIOCA
+                maxLevelReached = 1; //resetta il record del livello massimo raggiunto
                 currentMap = &manager.AddLevel(1, yMax);
                 p->resetPosition();
                 p->resetLevelFlags();
                 setupGameScreen();
                 generateEnemies();
                 inGame = true;
+                // AVVIO DEL TIMER
+                startTime = std::chrono::steady_clock::now();
+                timerRunning = true;
                 nodelay(stdscr, TRUE); // Imposta la modalità non bloccante per l'input
             } else {
                 break; // Esce dal gioco
@@ -207,13 +241,38 @@ void GameEngine::run() {
             else {
             
                 if (p->ReturnNextLevel()) {
+
+                    int livelloCorrente = currentMap->GetLvlN();
+                    
+                    // ======================================================
+                    // CHECK EXPLOIT: Diamo i punti solo se è la prima volta
+                    // ======================================================
+                    if (livelloCorrente >= maxLevelReached) {
+                        
+                        // --- CALCOLO BONUS TEMPO ---
+                        auto now = std::chrono::steady_clock::now();
+                        int tempoTrascorso = std::chrono::duration_cast<std::chrono::seconds>(now - startTime).count();
+                        int tempoRimanente = 2000 - tempoTrascorso;
+                        
+                        if (tempoRimanente > 0) {
+                            p->addScore(tempoRimanente * 10); 
+                        }
+                        
+                        // Aggiorniamo il record: il prossimo livello da battere sarà quello successivo!
+                        maxLevelReached = livelloCorrente + 1;
+                    }
+                    // ======================================================
+
                     p->erase(*currentMap);
                     resetGameVariables(); 
                     currentMap = &manager.nextLevel(yMax);
                     p->resetPosition();
                     p->resetLevelFlags();
                     setupGameScreen();    
-                    generateEnemies();    
+                    generateEnemies(); 
+                    
+                    // --- RESET DEL TIMER PER IL NUOVO LIVELLO ---
+                    startTime = std::chrono::steady_clock::now();
                 }
                 
                 if (p->ReturnPrevLevel()) {
