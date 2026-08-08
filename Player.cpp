@@ -246,3 +246,8 @@ void Player::addScore(int points) {
 int Player::getScore() { 
     return Score; 
 }
+
+void Player::resetStats() {
+        Score = 0;
+        Life = 3; 
+    }

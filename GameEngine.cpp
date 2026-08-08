@@ -181,6 +181,7 @@ void GameEngine::resetGameVariables() {
 }
 
 void GameEngine::showGameOverScreen() {
+    
     // Pulisce brutalmente tutto lo schermo
     clear(); 
     
@@ -206,6 +207,92 @@ void GameEngine::showGameOverScreen() {
     clear(); 
 }
 
+// Funzione per salvare il punteggio del giocatore in un file di testo
+void GameEngine::saveScore() {
+    int punteggioFinale = p->getScore();
+    
+    // Non salviamo i punteggi a zero
+    if (punteggioFinale <= 0) return; 
+
+    // Crea un oggetto ofstream in modalità 'app' (append) per non sovrascrivere
+    std::ofstream file("leaderboard.txt", std::ios::app);
+    
+    // Controlla se il file è stato aperto con successo
+    if (file.is_open()) {
+        file << punteggioFinale << "\n"; // Scrive il numero e va a capo
+        file.close();                    // Chiude il flusso
+    }
+}
+
+// Lettura e stampa della leaderboard dal file leaderboard.txt
+void GameEngine::showLeaderboard() {
+    clear();
+    
+    const char* titolo = "--- T O P   1 0   S C O R E S ---";
+    mvprintw(2, (xMax - strlen(titolo)) / 2, "%s", titolo);
+    
+    std::ifstream file("leaderboard.txt");
+    
+    int rigaY = 5;
+    
+    if (file.is_open()) {
+        int scoreLetto;
+        int scores[100]; // Array per salvare fino a 100 punteggi
+        int count = 0;
+        
+        // 1. Leggiamo tutti i punteggi dal file e li mettiamo nell'array
+        while (file >> scoreLetto && count < 100) {
+            scores[count] = scoreLetto;
+            count++;
+        }
+        file.close();
+        
+        // 2. Ordiniamo l'array dal più grande al più piccolo (Bubble Sort)
+        for (int i = 0; i < count - 1; i++) {
+            for (int j = 0; j < count - i - 1; j++) {
+                if (scores[j] < scores[j + 1]) {
+                    // Scambio i valori
+                    int temp = scores[j];
+                    scores[j] = scores[j + 1];
+                    scores[j + 1] = temp;
+                }
+            }
+        }
+        
+        // 3. Stampiamo i risultati
+        if (count > 0) {
+            // Vogliamo stampare al massimo i primi 10 risultati
+            int maxDaStampare = (count < 10) ? count : 10;
+            
+            for (int i = 0; i < maxDaStampare; i++) {
+                // Formattiamo la stringa con la posizione (es. "1. PUNTEGGIO: 005500")
+                mvprintw(rigaY, (xMax - 20) / 2, "%d. PUNTEGGIO: %06d", i + 1, scores[i]);
+                rigaY++;
+            }
+        } else {
+            // Il file esiste ma è vuoto
+            const char* errore = "Nessun punteggio salvato!";
+            mvprintw(rigaY, (xMax - strlen(errore)) / 2, "%s", errore);
+        }
+        
+    } else {
+        // Il file non esiste ancora
+        const char* errore = "Nessun punteggio salvato!";
+        mvprintw(rigaY, (xMax - strlen(errore)) / 2, "%s", errore);
+    }
+    
+    const char* subMsg = "Premi un tasto per tornare al Menu...";
+    mvprintw(rigaY + 3, (xMax - strlen(subMsg)) / 2, "%s", subMsg);
+    
+    refresh();
+    
+    nodelay(stdscr, FALSE);
+    flushinp();
+    getch();
+    
+    clear();
+}
+
 // Il Game Loop Principale
 void GameEngine::run() {
     while (true) {
@@ -215,6 +302,7 @@ void GameEngine::run() {
             
             if (menuChoice == 1) { // L'utente sceglie GIOCA
                 maxLevelReached = 1; //resetta il record del livello massimo raggiunto
+                p->resetStats(); //resetta le vite e lo score del giocatore
                 currentMap = &manager.AddLevel(1, yMax);
                 p->resetPosition();
                 p->resetLevelFlags();
@@ -225,6 +313,8 @@ void GameEngine::run() {
                 startTime = std::chrono::steady_clock::now();
                 timerRunning = true;
                 nodelay(stdscr, TRUE); // Imposta la modalità non bloccante per l'input
+            } else if (menuChoice == 2) { // L'utente sceglie CLASSIFICA
+                showLeaderboard();
             } else {
                 break; // Esce dal gioco
             }
@@ -301,6 +391,8 @@ void GameEngine::run() {
                 // --- CONTROLLO COLLISIONI PULITO ---
                 bool isGameOver = checkEnemyCollisions();
                 if (isGameOver) {
+                    saveScore(); // Salva il punteggio su file
+
                     // IL GIOCATORE HA PERSO
                     p->erase(*currentMap);
                     inGame = false;

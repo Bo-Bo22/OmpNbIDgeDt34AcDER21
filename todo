@@ -1,8 +1,5 @@
 fare i nemici
 fare gli oggetti
-fare il punteggio
-fare il tempo
-fare lista livelli menu
 
 animazione titolo
 cornice più carina per il gioco e cornice del menu
@@ -12,7 +9,6 @@ crea il file e la classe per settare la BFS
 fai la schermata di game over con scritta più grande
 
 
-fare le vite e metti che si resettano quando si salva il punteggio nel file apposito (fai il punteggio con il file .txt)
 fixa il fatto che le bombe ti fanno perdere una vita ma non ti uccidono (con l'animazione)
 fixa i nemici che respawnano quando torni indietro con il livello
 
@@ -21,3 +17,4 @@ Leggi bene le modifiche ai bottoni per quando cambiano dimensione da schiacciati
 Fixa i file hpp controllando che tutte le variabili siano protected e che le funzioni siano public e che non ci siano override
 Rimuovi metodi virtuali
 Guarda tutti i const che vengono utilizzati
+Sistema i nemici, fai tornare i 4 tipi di nemici diversi

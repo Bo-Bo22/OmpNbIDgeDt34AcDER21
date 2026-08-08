@@ -23,7 +23,6 @@ protected:
     int selectedLevel;
     
     Button play;
-    Button lvlList;
     Button ldrBoard;   
     Button exitBtn; 
     plista_cmd n1; 

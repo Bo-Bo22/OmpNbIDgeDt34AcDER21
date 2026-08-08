@@ -48,5 +48,7 @@ public:
 
     void addScore(int points);
     int getScore();
+    
+    void resetStats();
 };
 #endif

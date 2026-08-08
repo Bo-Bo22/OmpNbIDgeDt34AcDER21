@@ -3,6 +3,8 @@
 
 #include <ncurses.h>
 #include <chrono>
+#include <fstream>
+#include <cstring>
 #include "Player.hpp"
 #include "Map.hpp"
 #include "LevelManager.hpp"
@@ -51,6 +53,10 @@ public:
     int getNumeroNemici() { return numeroNemici; }
 
     void showGameOverScreen();
+
+    void saveScore();
+
+    void showLeaderboard();
     
     // Invece di restituire tutto l'array, creiamo un metodo che restituisce il singolo nemico
     Enemy* getNemico(int indice) { 

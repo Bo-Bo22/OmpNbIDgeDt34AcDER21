@@ -10,10 +10,9 @@ MainMenu::MainMenu(int MaxY, int MaxX) :
 
     // Inizializzazione dei bottoni con le coordinate calcolate in base alla dimensione dello schermo
     // Spazio orizzontale centrato: (MaxX - larghezza_bottone) / 2
-    play(stdscr, MaxY/2 - 2, (MaxX - 20) / 2, 1, 7, 20, "GIOCA"),
-    lvlList(stdscr, MaxY/2 + 2, (MaxX - 20) / 2,  1, 3, 20, "LISTA LIVELLI"),
-    ldrBoard(stdscr, MaxY/2 + 6, (MaxX - 20) / 2, 1, 4, 20, "LEADERBOARD"),
-    exitBtn(stdscr, MaxY/2 + 10, (MaxX - 20) / 2, 1, 8, 20, "ESCI") 
+    play(stdscr, MaxY/2 - 4, (MaxX - 20) / 2, 1, 7, 20, "GIOCA"),
+    ldrBoard(stdscr, MaxY/2, (MaxX - 20) / 2, 1, 4, 20, "LEADERBOARD"),
+    exitBtn(stdscr, MaxY/2 + 4, (MaxX - 20) / 2, 1, 8, 20, "ESCI") 
 {
     // Inizializza lo stato del menu e dei bottoni usando una lista concatenata circolare
     currentPage = MenuPage::MAIN;
@@ -21,14 +20,13 @@ MainMenu::MainMenu(int MaxY, int MaxX) :
     
     //sono variabili membri della classe definite nell'header e non variabili temporanee create sul momento.
     n1 = new lista_cmd{&play, NULL, NULL};
-    n2 = new lista_cmd{&lvlList, NULL, n1};
-    n3 = new lista_cmd{&ldrBoard, NULL, n2};
-    n4 = new lista_cmd{&exitBtn, n1, n3};
+    n2 = new lista_cmd{&ldrBoard, NULL, n1};
+    n3 = new lista_cmd{&exitBtn, n1, n2};
          
     n1->next = n2;
-    n1->prev = n4;
+    n1->prev = n3;
     n2->next = n3;
-    n3->next = n4;
+    n3->next = n1;
     curr = n1;
 }
 
@@ -58,7 +56,7 @@ int testo_width = 63; // Ricordati di aggiornare testo_width a 63 nel drawMain!
     
     // Disegna e aggiorna tutti i pulsanti della lista usando un puntatore per scorrere la lista
     plista_cmd tmp = n1;
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 3; i++) { // Aggiornato a 3 bottoni
         tmp->btn->tick();
         tmp = tmp->next;
     }
@@ -117,11 +115,8 @@ int MainMenu::run(int MaxY, int MaxX) {
                 if (strcmp(curr->btn->getLabel(), "GIOCA") == 0) {
                     return 1;
                 }
-                else if (strcmp(curr->btn->getLabel(), "LISTA LIVELLI") == 0) {
-                    return 2;
-                }
                 else if (strcmp(curr->btn->getLabel(), "LEADERBOARD") == 0) {
-                    return 3;
+                    return 2; // Aggiornato a 2
                 }
                 else if (strcmp(curr->btn->getLabel(), "ESCI") == 0) {
                     return -1;
