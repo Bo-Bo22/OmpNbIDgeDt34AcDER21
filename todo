@@ -9,6 +9,7 @@ cornice più carina per il gioco e cornice del menu
 migliorare l'estetica generale, aggiungendo colori e blocchi per i muri
 rimuovi override da enemy.hpp
 crea il file e la classe per settare la BFS
+fai la schermata di game over con scritta più grande
 
 
 fare le vite e metti che si resettano quando si salva il punteggio nel file apposito (fai il punteggio con il file .txt)
@@ -19,3 +20,4 @@ fai il tempo e capisci come funziona chrono
 Leggi bene le modifiche ai bottoni per quando cambiano dimensione da schiacciati
 Fixa i file hpp controllando che tutte le variabili siano protected e che le funzioni siano public e che non ci siano override
 Rimuovi metodi virtuali
+Guarda tutti i const che vengono utilizzati

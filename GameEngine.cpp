@@ -154,18 +154,22 @@ void GameEngine::showGameOverScreen() {
     // Pulisce brutalmente tutto lo schermo
     clear(); 
     
-    // Testi da visualizzare
-    std::string msg = "G A M E   O V E R";
-    std::string subMsg = "Premi un tasto per tornare al Menu...";
+    // Testi da visualizzare usando const char* (C-strings)
+    const char* msg = "G A M E   O V E R";
+    const char* subMsg = "Premi un tasto per tornare al Menu...";
     
-    // Stampa al centro esatto dello schermo terminale
-    mvprintw(yMax / 2 - 1, (xMax - msg.length()) / 2, "%s", msg.c_str());
-    mvprintw(yMax / 2 + 1, (xMax - subMsg.length()) / 2, "%s", subMsg.c_str());
+    // Stampa al centro esatto dello schermo terminale usando strlen()
+    mvprintw(yMax / 2 - 1, (xMax - strlen(msg)) / 2, "%s", msg);
+    mvprintw(yMax / 2 + 1, (xMax - strlen(subMsg)) / 2, "%s", subMsg);
     
     refresh();
     
     // Si assicura che getch() si blocchi in attesa di un tasto
     nodelay(stdscr, FALSE); 
+
+    // Pulisce eventuali input residui nel buffer per evitare che il tasto premuto in precedenza venga catturato
+    flushinp();
+
     getch(); 
     
     // Ripulisce lo schermo prima di ridare il controllo al MainMenu
