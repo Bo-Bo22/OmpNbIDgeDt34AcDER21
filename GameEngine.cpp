@@ -395,8 +395,8 @@ void GameEngine::run() {
 
                 if (isHit) {
                     p->erase(*currentMap);
-                    p->Death(false); 
-                    
+                    p->Death(true); 
+
                     if (p->getLife() <= 0) {
                         // GAME OVER DEFINITIVO
                         saveScore(); 
