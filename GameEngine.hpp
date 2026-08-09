@@ -11,6 +11,7 @@
 #include "Bomb.hpp"
 #include "Enemy.hpp"
 #include "MainMenu.hpp"
+#include "Item.hpp"
 
 class GameEngine {
 protected:
@@ -42,6 +43,8 @@ protected:
     void updateAndDrawBombs();
     void resetGameVariables();
     bool checkEnemyCollisions();
+
+    void checkItemCollisions();
 
     //Variabili per la gestione del tempo di gioco
     std::chrono::time_point<std::chrono::steady_clock> startTime;

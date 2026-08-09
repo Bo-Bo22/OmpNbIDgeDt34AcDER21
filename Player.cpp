@@ -34,7 +34,7 @@ void Player::mvup(Map &Mappa) {
     if (nextY < 1) nextY = 1;  // Limita il movimento al bordo
 
     // Controlla se la cella successiva è traversabile (spazio vuoto)
-    if (Mappa.GetPos(nextY, xLoc) == 0) {
+    if (Mappa.GetPos(nextY, xLoc) == 0 || Mappa.GetPos(nextY, xLoc) == 3 || Mappa.GetPos(nextY, xLoc) == 4 || Mappa.GetPos(nextY, xLoc) == 5) { // 5 = oggetto nascosto, 4 = porta
         redrawPreviousCell(Mappa);
         yLoc = nextY;
         display();
@@ -51,7 +51,7 @@ void Player::mvdown(Map &Mappa) {
     if (nextY > yMax - 2) nextY = yMax - 2;  // Limita il movimento al bordo
 
     // Controlla se la cella successiva è traversabile (spazio vuoto o porta)
-    if (Mappa.GetPos(nextY, xLoc) == 0 || Mappa.GetPos(nextY, xLoc) == 3 || Mappa.GetPos(nextY, xLoc) == 4) {
+    if (Mappa.GetPos(nextY, xLoc) == 0 || Mappa.GetPos(nextY, xLoc) == 3 || Mappa.GetPos(nextY, xLoc) == 4 || Mappa.GetPos(nextY, xLoc) == 5) {
         redrawPreviousCell(Mappa);
         yLoc = nextY;
         display();
@@ -68,7 +68,7 @@ void Player::mvleft(Map &Mappa) {
     if (nextX < 1) nextX = 1;  // Limita il movimento al bordo
 
     // Controlla se la cella successiva è traversabile (spazio vuoto o porta)
-    if (Mappa.GetPos(yLoc, nextX) == 0 || Mappa.GetPos(yLoc, nextX) == 3 || Mappa.GetPos(yLoc, nextX) == 4) {
+    if (Mappa.GetPos(yLoc, nextX) == 0 || Mappa.GetPos(yLoc, nextX) == 3 || Mappa.GetPos(yLoc, nextX) == 4 || Mappa.GetPos(yLoc, nextX) == 5) {
         redrawPreviousCell(Mappa);
         xLoc = nextX;
         display();
@@ -85,7 +85,7 @@ void Player::mvright(Map &Mappa) {
     if (nextX > xMax - 2) nextX = xMax - 2;  // Limita il movimento al bordo
 
     // Controlla se la cella successiva è traversabile (spazio vuoto o porta)
-    if (Mappa.GetPos(yLoc, nextX) == 0 || Mappa.GetPos(yLoc, nextX) == 3 || Mappa.GetPos(yLoc, nextX) == 4) {
+    if (Mappa.GetPos(yLoc, nextX) == 0 || Mappa.GetPos(yLoc, nextX) == 3 || Mappa.GetPos(yLoc, nextX) == 4 || Mappa.GetPos(yLoc, nextX) == 5) {
         redrawPreviousCell(Mappa);
         xLoc = nextX;
         display();

@@ -171,6 +171,42 @@ bool GameEngine::checkBombCollisions() {
     return false;
 }
 
+// Funzione per gestire la collisione con gli oggetti nascosti ($)
+void GameEngine::checkItemCollisions() {
+    int pY = p->getY();
+    int pX = p->getX();
+    
+    // Se il giocatore si trova su una cella con il valore 5 ($)
+    if (currentMap->GetPos(pY, pX) == 5) {
+        
+        // 1. Sceglie un potenziamento casuale e lo applica
+        int tipoCasuale = (rand() % 3) + 1;
+        Item powerup(tipoCasuale);
+        powerup.applyEffect(p);
+        
+        // 2. Rimuove fisicamente il $ dalla mappa
+        currentMap->setPos(pY, pX, 0);
+        currentMap->RedrawCell(pY, pX);
+        
+        // ======================================================
+        // 3. ANIMAZIONE DI RACCOLTA (Lampeggio del Player)
+        // ======================================================
+        for (int b = 0; b < 3; b++) { // Ripete il lampeggio 3 volte
+            
+            // Cancella il player e aggiorna lo schermo
+            p->erase(*currentMap);
+            wrefresh(currentMap->getWin());
+            napms(40); // Pausa di 40 millisecondi
+            
+            // Ridisegna il player e aggiorna lo schermo
+            p->display();
+            wrefresh(currentMap->getWin());
+            napms(40); // Pausa di 40 millisecondi
+        }
+        // ======================================================
+    }
+}
+
 // Pulisce le variabili prima di un cambio livello
 void GameEngine::resetGameVariables() {
     // Distrugge tutte le bombe in corso per evitare che esplodano nella memoria
@@ -427,6 +463,9 @@ void GameEngine::run() {
                         arrayNemici[i]->display();               
                     }
                 }
+
+                // Controlla se il giocatore ha raccolto un oggetto nascosto
+                checkItemCollisions();
                 
                 // --- CONTROLLO COLLISIONI PULITO ---
                 bool isHit = checkEnemyCollisions() || checkBombCollisions();
