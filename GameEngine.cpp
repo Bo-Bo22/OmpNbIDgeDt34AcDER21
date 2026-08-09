@@ -305,11 +305,17 @@ void GameEngine::run() {
             if (menuChoice == 1) { // L'utente sceglie GIOCA
                 maxLevelReached = 1; //resetta il record del livello massimo raggiunto
                 p->resetStats(); //resetta le vite e lo score del giocatore
+                // === RESET PROGRESSIONE LIVELLI ===
+                for (int i = 0; i < 50; i++) {
+                    livelloVisitato[i] = false;
+                }
                 currentMap = &manager.AddLevel(1, yMax);
                 p->resetPosition();
                 p->resetLevelFlags();
                 setupGameScreen();
                 generateEnemies();
+                // Segniamo il primo livello come visitato
+                livelloVisitato[1] = true;
                 inGame = true;
                 // AVVIO DEL TIMER
                 startTime = std::chrono::steady_clock::now();
@@ -332,28 +338,27 @@ void GameEngine::run() {
             }
             else {
             
+                // ==========================================================
+                // CAMBIO LIVELLO IN AVANTI
+                // ==========================================================
                 if (p->ReturnNextLevel()) {
 
                     int livelloCorrente = currentMap->GetLvlN();
                     
-                    // ======================================================
-                    // CHECK EXPLOIT: Diamo i punti solo se è la prima volta
-                    // ======================================================
+                    // 1. SALVA I NEMICI DEL LIVELLO CORRENTE
+                    numNemiciPerLivello[livelloCorrente] = numeroNemici;
+                    for (int i = 0; i < numeroNemici; i++) {
+                        nemiciPerLivello[livelloCorrente][i] = arrayNemici[i];
+                    }
+
+                    // CHECK EXPLOIT: Bonus punti (il tuo codice originale)
                     if (livelloCorrente >= maxLevelReached) {
-                        
-                        // --- CALCOLO BONUS TEMPO ---
                         auto now = std::chrono::steady_clock::now();
                         int tempoTrascorso = std::chrono::duration_cast<std::chrono::seconds>(now - startTime).count();
                         int tempoRimanente = 2000 - tempoTrascorso;
-                        
-                        if (tempoRimanente > 0) {
-                            p->addScore(tempoRimanente * 10); 
-                        }
-                        
-                        // Aggiorniamo il record: il prossimo livello da battere sarà quello successivo!
+                        if (tempoRimanente > 0) p->addScore(tempoRimanente * 10); 
                         maxLevelReached = livelloCorrente + 1;
                     }
-                    // ======================================================
 
                     p->erase(*currentMap);
                     resetGameVariables(); 
@@ -361,20 +366,53 @@ void GameEngine::run() {
                     p->resetPosition();
                     p->resetLevelFlags();
                     setupGameScreen();    
-                    generateEnemies(); 
                     
-                    // --- RESET DEL TIMER PER IL NUOVO LIVELLO ---
+                    // 2. CARICA O GENERA NEMICI PER LA NUOVA MAPPA
+                    int nuovoLvl = currentMap->GetLvlN();
+                    if (livelloVisitato[nuovoLvl]) {
+                        // Ci siamo già stati: ripristina la situazione salvata
+                        numeroNemici = numNemiciPerLivello[nuovoLvl];
+                        for (int i = 0; i < numeroNemici; i++) {
+                            arrayNemici[i] = nemiciPerLivello[nuovoLvl][i];
+                        }
+                    } else {
+                        // Stanza inesplorata: genera nuovi mostri
+                        generateEnemies();
+                        livelloVisitato[nuovoLvl] = true;
+                    }
+                    
+                    // RESET TIMER
                     startTime = std::chrono::steady_clock::now();
                 }
                 
+                // ==========================================================
+                // RITORNO AL LIVELLO PRECEDENTE
+                // ==========================================================
                 if (p->ReturnPrevLevel()) {
+                    
+                    int livelloCorrente = currentMap->GetLvlN();
+                    
+                    // 1. SALVA I NEMICI DEL LIVELLO CORRENTE
+                    numNemiciPerLivello[livelloCorrente] = numeroNemici;
+                    for (int i = 0; i < numeroNemici; i++) {
+                        nemiciPerLivello[livelloCorrente][i] = arrayNemici[i];
+                    }
+
                     p->erase(*currentMap);
                     resetGameVariables(); 
                     currentMap = &manager.prevLevel();
                     p->resetPosition();
                     p->resetLevelFlags();
                     setupGameScreen();    
-                    generateEnemies();    
+                    
+                    // 2. RIPRISTINA I NEMICI DEL LIVELLO PRECEDENTE
+                    int vecchioLvl = currentMap->GetLvlN();
+                    if (livelloVisitato[vecchioLvl]) {
+                        numeroNemici = numNemiciPerLivello[vecchioLvl];
+                        for (int i = 0; i < numeroNemici; i++) {
+                            arrayNemici[i] = nemiciPerLivello[vecchioLvl][i];
+                        }
+                    }
                 }
                 
                 // Rendering HUD e Mappa

@@ -9,12 +9,12 @@ crea il file e la classe per settare la BFS
 fai la schermata di game over con scritta più grande
 
 
-fixa il fatto che le bombe ti fanno perdere una vita ma non ti uccidono (con l'animazione)
-fixa i nemici che respawnano quando torni indietro con il livello
-
+fai gli oggetti
 
 Leggi bene le modifiche ai bottoni per quando cambiano dimensione da schiacciati
 Fixa i file hpp controllando che tutte le variabili siano protected e che le funzioni siano public e che non ci siano override
 Rimuovi metodi virtuali
 Guarda tutti i const che vengono utilizzati
 Sistema i nemici, fai tornare i 4 tipi di nemici diversi
+Capisci bene come mai i nemici non spawnano quando torni indietro con il livello e capisci perchè è una feature
+

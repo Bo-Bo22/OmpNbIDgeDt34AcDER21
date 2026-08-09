@@ -30,6 +30,10 @@ protected:
     Enemy* arrayNemici[MAX_NEMICI];
     int numeroNemici;
 
+    Enemy* nemiciPerLivello[50][30]; 
+    int numNemiciPerLivello[50];
+    bool livelloVisitato[50];
+
     // Metodi privati ausiliari
     void setupGameScreen();
     void generateEnemies();
