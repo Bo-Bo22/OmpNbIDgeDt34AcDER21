@@ -57,6 +57,8 @@ public:
     void saveScore();
 
     void showLeaderboard();
+
+    bool checkBombCollisions(); // Controlla se il giocatore è stato colpito da un'esplosione
     
     // Invece di restituire tutto l'array, creiamo un metodo che restituisce il singolo nemico
     Enemy* getNemico(int indice) { 

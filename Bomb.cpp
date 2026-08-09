@@ -52,8 +52,7 @@ bool Bomb::update(Map &Mappa, Player &Pl, Enemy** En, int n_nemici) {
 
         // Controlla se il giocatore è fermo proprio sopra la bomba
         if (Pl.getX() == xLoc && Pl.getY()== yLoc){
-            Pl.Death(false);                
-            isHit = true;
+            Pl.setHitByExplosion(true); // Segnala che il giocatore è stato colpito
         }
 
         // Controlla se ci sono nemici proprio sopra la bomba
@@ -71,7 +70,7 @@ bool Bomb::update(Map &Mappa, Player &Pl, Enemy** En, int n_nemici) {
                 int tX = xLoc + dx[k] * (i + 1);
 
                 // Se in questa direzione l'onda d'urto è stata fermata, passa oltre
-                if (direzione[k] == false) continue; 
+                if (direzione[k] == true){ 
 
                 // Blocca la fiamma se incontra un muro indistruttibile (1) 
                 // o un muro distruttibile (2) a meno che non ci sia il powerup 'flare_boost'
@@ -85,18 +84,18 @@ bool Bomb::update(Map &Mappa, Player &Pl, Enemy** En, int n_nemici) {
                 }
 
                 // Danni della fiamma sul Giocatore (con controllo area di sicurezza iniziale)
-                if (Pl.getX() == tX && Pl.getY()==tY && (Pl.getX() > 3 && Pl.getY() > 3)){
-                    Pl.Death(false);                
-                    isHit = true;
+                if (Pl.getX() == tX && Pl.getY() == tY) {
+                    Pl.setHitByExplosion(true);
                 }
 
                     // Danni della fiamma sui Nemici
                     for (int j = 0; j < n_nemici; j++){
                         if(En[j]->getX() == tX && En[j]->getY() == tY){
                             // Controlliamo che sia vivo per non fare punti infiniti!
-                        if (En[j]->isAlive()) { 
-                            En[j]->kill(Mappa);
-                            Pl.addScore(500); // <-- 500 PUNTI PER IL NEMICO
+                            if (En[j]->isAlive()) { 
+                                En[j]->kill(Mappa);
+                                Pl.addScore(500); // <-- 500 PUNTI PER IL NEMICO
+                            }
                         }
                     }
                 }
@@ -164,14 +163,14 @@ void Bomb::forceExplode(){
 bool Bomb::isActive(){
     return active;
 }
+
 void Bomb::display(){
     wrefresh(curwin);
 }
 
 int Bomb::getX(){return xLoc;}
+
 int Bomb::getY(){return yLoc;}
-
-
 
 Bomb::Bomb(int x, int y, WINDOW* win, int estensione, bool fl_bst){
     yLoc = y;

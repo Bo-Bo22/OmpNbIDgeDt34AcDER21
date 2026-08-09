@@ -153,20 +153,22 @@ bool GameEngine::checkEnemyCollisions() {
     for (int i = 0; i < numeroNemici; i++) {
         if (arrayNemici[i] != NULL && arrayNemici[i]->isAlive()) {
             
-            // Se le coordinate coincidono
+            // Se le coordinate coincidono, il giocatore è stato toccato
             if (p->getX() == arrayNemici[i]->getX() && p->getY() == arrayNemici[i]->getY()) {
-                
-                // Applica il danno e fa lampeggiare il giocatore
-                p->Death(true); 
-                
-                // Controlla se il giocatore è definitivamente morto
-                if (p->getLife() <= 0) {
-                    return true; // Ritorna true segnalando il GAME OVER
-                }
+                return true; // Segnala semplicemente il "COLPO SUBITO"
             }
         }
     }
-    return false; // Il giocatore è sopravvissuto al frame attuale
+    return false; // Nessuna collisione in questo frame
+}
+
+// Controlla se il giocatore è stato colpito da un'esplosione di bomba
+bool GameEngine::checkBombCollisions() {
+    if (p->getHitByExplosion()) {
+        p->setHitByExplosion(false); 
+        return true; 
+    }
+    return false;
 }
 
 // Pulisce le variabili prima di un cambio livello
@@ -389,20 +391,25 @@ void GameEngine::run() {
                 }
                 
                 // --- CONTROLLO COLLISIONI PULITO ---
-                bool isGameOver = checkEnemyCollisions();
-                if (isGameOver) {
-                    saveScore(); // Salva il punteggio su file
+                bool isHit = checkEnemyCollisions() || checkBombCollisions();
 
-                    // IL GIOCATORE HA PERSO
+                if (isHit) {
                     p->erase(*currentMap);
-                    inGame = false;
+                    p->Death(false); 
                     
-                    // Ripristina l'input bloccante per permettere ai menu di funzionare
-                    nodelay(stdscr, FALSE); 
+                    if (p->getLife() <= 0) {
+                        // GAME OVER DEFINITIVO
+                        saveScore(); 
+                        inGame = false;
+                        nodelay(stdscr, FALSE); 
+                        showGameOverScreen();
+                    } else {
+                        // RESPAWN CON VITE RIMANENTI
+                        p->resetPosition();
+                        setupGameScreen();
+                    }
                     
-                    showGameOverScreen();
-                    resetGameVariables(); // Pulisce le vecchie bombe
-
+                    resetGameVariables(); 
                 }
                 else{
 

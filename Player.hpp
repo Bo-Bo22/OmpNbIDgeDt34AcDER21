@@ -17,6 +17,8 @@ protected:
     int Life;
     int Score;
 
+    bool hitByExplosion;
+
 public:
     Player(WINDOW* win, int y, int x, char c);
     
@@ -50,5 +52,8 @@ public:
     int getScore();
     
     void resetStats();
+
+    void setHitByExplosion(bool state);
+    bool getHitByExplosion();
 };
 #endif

@@ -15,6 +15,8 @@ Player::Player(WINDOW* win, int y, int x, char c) {
     
     Life = 3; // Inizializziamo le vite del giocatore
     Score = 0; // Inizializziamo lo score del giocatore
+
+    hitByExplosion = false; // Inizializziamo lo stato di colpito dall'esplosione
 }
 
 // Aggiorna la finestra del giocatore e i suoi limiti massimi
@@ -251,3 +253,11 @@ void Player::resetStats() {
         Score = 0;
         Life = 3; 
     }
+
+void Player::setHitByExplosion(bool state) {
+    hitByExplosion = state; 
+}
+
+bool Player::getHitByExplosion() {
+    return hitByExplosion;
+}
