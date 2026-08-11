@@ -19,6 +19,10 @@ protected:
 
     bool hitByExplosion;
 
+    int maxBombs = 1;      // Numero massimo di bombe piazzabili
+    int bombRange = 1;     // Lunghezza dell'esplosione
+    bool wallPass = false; // Permette di attraversare i muri distruttibili
+
 public:
     Player(WINDOW* win, int y, int x, char c);
     
@@ -55,5 +59,16 @@ public:
 
     void setHitByExplosion(bool state);
     bool getHitByExplosion();
+
+    // Metodi per applicare i potenziamenti
+    void addLife(); // Assicurati che la tua variabile delle vite si chiami 'life'
+    void addMaxBombs();
+    void addBombRange();
+    void setWallPass(bool status);
+
+    // Getters per leggere i valori nel GameEngine
+    int getMaxBombs();
+    int getBombRange();
+    bool hasWallPass();
 };
 #endif

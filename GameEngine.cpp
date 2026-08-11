@@ -46,10 +46,25 @@ void GameEngine::setupGameScreen() {
 // Gestione dell'input per piazzare la bomba
 void GameEngine::handleBombPlacement(int tasto) {
     if (tasto == ' ') {
+        
+        // 1. Conta quante bombe ha già piazzato il giocatore in questo momento
+        int bombePiazzate = 0;
         for (int i = 0; i < MAX_BOMBE; i++) {
-            if (bombeAttive[i] == NULL) {
-                bombeAttive[i] = new Bomb(p->getX(), p->getY(), currentMap->getWin(), 2, false);
-                break;
+            if (bombeAttive[i] != NULL) {
+                bombePiazzate++;
+            }
+        }
+        
+        // 2. Se non ha superato il suo limite (maxBombs), procedi
+        if (bombePiazzate < p->getMaxBombs()) {
+            
+            for (int i = 0; i < MAX_BOMBE; i++) {
+                if (bombeAttive[i] == NULL) {
+                    
+                    // 3. Sostituito il "2" fisso con p->getBombRange()!
+                    bombeAttive[i] = new Bomb(p->getX(), p->getY(), currentMap->getWin(), p->getBombRange(), false);
+                    break;
+                }
             }
         }
     }
@@ -180,7 +195,7 @@ void GameEngine::checkItemCollisions() {
     if (currentMap->GetPos(pY, pX) == 5) {
         
         // 1. Sceglie un potenziamento casuale e lo applica
-        int tipoCasuale = (rand() % 3) + 1;
+        int tipoCasuale = 5;
         Item powerup(tipoCasuale);
         powerup.applyEffect(p);
         
@@ -516,13 +531,19 @@ void GameEngine::run() {
                 int playerY = p->getY(); 
                 int playerX = p->getX();
                 int valoreCellaPorta = currentMap->GetPos(pY, pX);
+                
+                // --- RECUPERO STATISTICHE DEI POWERUP ---
+                int maxBmb = p->getMaxBombs();
+                int raggio = p->getBombRange();
+                int passMuri = p->hasWallPass(); // 1 = Vero, 0 = Falso
 
-                mvprintw(0, 0, "DEBUG | TuttiMorti: %d | PortaNascosta(Y:%d X:%d Valore:%d) | Player(Y:%d X:%d)       ", 
-                        tuttiMorti, pY, pX, valoreCellaPorta, playerY, playerX);
+                // 3. Stampa il menu di debug aggiornato e compatto
+                mvprintw(0, 0, "DBG | TuttiMorti: %d | Porta(Y:%d X:%d Val:%d) | P(Y:%d X:%d) | Bmb:%d Rgg:%d Muri:%d    ", 
+                        tuttiMorti, pY, pX, valoreCellaPorta, playerY, playerX, maxBmb, raggio, passMuri);
                         
                 refresh();
 
-                // 3. Fai apparire la porta
+                // 4. Fai apparire la porta
                 if (tuttiMorti == true && currentMap->GetPos(pY, pX) == 0) {
                     currentMap->setPos(pY, pX, 3);       // Piazza la porta
                     currentMap->RedrawCell(pY, pX);      // Disegnala a schermo

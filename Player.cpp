@@ -33,16 +33,20 @@ void Player::mvup(Map &Mappa) {
     int nextY = yLoc - 1;
     if (nextY < 1) nextY = 1;  // Limita il movimento al bordo
 
-    // Controlla se la cella successiva è traversabile (spazio vuoto)
-    if (Mappa.GetPos(nextY, xLoc) == 0 || Mappa.GetPos(nextY, xLoc) == 3 || Mappa.GetPos(nextY, xLoc) == 4 || Mappa.GetPos(nextY, xLoc) == 5) { // 5 = oggetto nascosto, 4 = porta
+    // Salviamo il valore della cella in una variabile per avere un codice più pulito
+    int cella = Mappa.GetPos(nextY, xLoc);
+
+    // Controlla se la cella successiva è traversabile
+    // (cella == 2 && hasWallPass()) per attraversare i muri distruttibili!
+    if (cella == 0 || cella == 3 || cella == 4 || cella == 5 || (cella == 2 && hasWallPass())) { 
         redrawPreviousCell(Mappa);
         yLoc = nextY;
         display();
     }
 
     // Controlla se il giocatore ha raggiunto una porta
-    if (Mappa.GetPos(nextY, xLoc) == 3) NextLevel = true;   // Porta livello successivo (>)
-    if (Mappa.GetPos(nextY, xLoc) == 4) PrevLevel = true;   // Porta livello precedente (<)
+    if (cella == 3) NextLevel = true;   // Porta livello successivo (>)
+    if (cella == 4) PrevLevel = true;   // Porta livello precedente (<)
 }
 
 // Muove il giocatore verso il basso se la cella successiva è libera o è una porta
@@ -50,16 +54,18 @@ void Player::mvdown(Map &Mappa) {
     int nextY = yLoc + 1;
     if (nextY > yMax - 2) nextY = yMax - 2;  // Limita il movimento al bordo
 
+    int cella = Mappa.GetPos(nextY, xLoc);
+
     // Controlla se la cella successiva è traversabile (spazio vuoto o porta)
-    if (Mappa.GetPos(nextY, xLoc) == 0 || Mappa.GetPos(nextY, xLoc) == 3 || Mappa.GetPos(nextY, xLoc) == 4 || Mappa.GetPos(nextY, xLoc) == 5) {
+    if (cella == 0 || cella == 3 || cella == 4 || cella == 5 || (cella == 2 && hasWallPass())) {
         redrawPreviousCell(Mappa);
         yLoc = nextY;
         display();
     }
 
     // Controlla se il giocatore ha raggiunto una porta
-    if (Mappa.GetPos(nextY, xLoc) == 3) NextLevel = true;   // Porta livello successivo (>)
-    if (Mappa.GetPos(nextY, xLoc) == 4) PrevLevel = true;   // Porta livello precedente (<)
+    if (cella == 3) NextLevel = true;   // Porta livello successivo (>)
+    if (cella == 4) PrevLevel = true;   // Porta livello precedente (<)
 }
 
 // Muove il giocatore verso sinistra se la cella successiva è libera o è una porta
@@ -67,16 +73,18 @@ void Player::mvleft(Map &Mappa) {
     int nextX = xLoc - 1;
     if (nextX < 1) nextX = 1;  // Limita il movimento al bordo
 
+    int cella = Mappa.GetPos(yLoc, nextX);
+
     // Controlla se la cella successiva è traversabile (spazio vuoto o porta)
-    if (Mappa.GetPos(yLoc, nextX) == 0 || Mappa.GetPos(yLoc, nextX) == 3 || Mappa.GetPos(yLoc, nextX) == 4 || Mappa.GetPos(yLoc, nextX) == 5) {
+    if (cella == 0 || cella == 3 || cella == 4 || cella == 5 || (cella == 2 && hasWallPass())) {
         redrawPreviousCell(Mappa);
         xLoc = nextX;
         display();
     }
 
     // Controlla se il giocatore ha raggiunto una porta
-    if (Mappa.GetPos(yLoc, nextX) == 3) NextLevel = true;   // Porta livello successivo (>)
-    if (Mappa.GetPos(yLoc, nextX) == 4) PrevLevel = true;   // Porta livello precedente (<)
+    if (cella == 3) NextLevel = true;   // Porta livello successivo (>)
+    if (cella == 4) PrevLevel = true;   // Porta livello precedente (<)
 }
 
 // Muove il giocatore verso destra se la cella successiva è libera o è una porta
@@ -84,16 +92,18 @@ void Player::mvright(Map &Mappa) {
     int nextX = xLoc + 1;
     if (nextX > xMax - 2) nextX = xMax - 2;  // Limita il movimento al bordo
 
+    int cella = Mappa.GetPos(yLoc, nextX);
+
     // Controlla se la cella successiva è traversabile (spazio vuoto o porta)
-    if (Mappa.GetPos(yLoc, nextX) == 0 || Mappa.GetPos(yLoc, nextX) == 3 || Mappa.GetPos(yLoc, nextX) == 4 || Mappa.GetPos(yLoc, nextX) == 5) {
+    if (cella == 0 || cella == 3 || cella == 4 || cella == 5 || (cella == 2 && hasWallPass())) {
         redrawPreviousCell(Mappa);
         xLoc = nextX;
         display();
     }
 
     // Controlla se il giocatore ha raggiunto una porta
-    if (Mappa.GetPos(yLoc, nextX) == 3) NextLevel = true;   // Porta livello successivo (>)
-    if (Mappa.GetPos(yLoc, nextX) == 4) PrevLevel = true;   // Porta livello precedente (<)
+    if (cella == 3) NextLevel = true;   // Porta livello successivo (>)
+    if (cella == 4) PrevLevel = true;   // Porta livello precedente (<)
 }
 
 // Gestisce l'input da tastiera e chiama il metodo di movimento appropriato
@@ -250,9 +260,12 @@ int Player::getScore() {
 }
 
 void Player::resetStats() {
-        Score = 0;
-        Life = 3; 
-    }
+    Score = 0;
+    Life = 3;
+    maxBombs = 1;
+    bombRange = 1;
+    wallPass = false;
+}
 
 void Player::setHitByExplosion(bool state) {
     hitByExplosion = state; 
@@ -260,4 +273,31 @@ void Player::setHitByExplosion(bool state) {
 
 bool Player::getHitByExplosion() {
     return hitByExplosion;
+}
+
+// Metodi per applicare i potenziamenti
+void Player::addLife() { 
+    Life++; 
+}
+void Player::addMaxBombs() { 
+    maxBombs++; 
+}
+void Player::addBombRange() { 
+    bombRange++; 
+}
+void Player::setWallPass(bool status) { 
+    wallPass = status; 
+}
+
+// Getters per leggere i valori nel GameEngine
+int Player::getMaxBombs() { 
+    return maxBombs; 
+}
+
+int Player::getBombRange() { 
+    return bombRange; 
+}
+
+bool Player::hasWallPass() {
+    return wallPass; 
 }
