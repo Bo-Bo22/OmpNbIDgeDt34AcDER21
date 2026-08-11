@@ -47,7 +47,16 @@ void GameEngine::setupGameScreen() {
 void GameEngine::handleBombPlacement(int tasto) {
     if (tasto == ' ') {
         
-        // 1. Conta quante bombe ha già piazzato il giocatore in questo momento
+        // ==========================================================
+        // CONTROLLO ANTI-EXPLOIT: Niente bombe dentro i muri!
+        // ==========================================================
+        // Controlliamo il valore della mappa alle coordinate attuali del player
+        if (currentMap->GetPos(p->getY(), p->getX()) == 2) {
+            return; // Il giocatore è in un muro (grazie al wallPass). Interrompi subito la funzione!
+        }
+        
+        // Se siamo qui, significa che il giocatore è su un terreno valido.
+        // Procediamo col normale conteggio e piazzamento.
         int bombePiazzate = 0;
         for (int i = 0; i < MAX_BOMBE; i++) {
             if (bombeAttive[i] != NULL) {
@@ -55,13 +64,10 @@ void GameEngine::handleBombPlacement(int tasto) {
             }
         }
         
-        // 2. Se non ha superato il suo limite (maxBombs), procedi
         if (bombePiazzate < p->getMaxBombs()) {
-            
             for (int i = 0; i < MAX_BOMBE; i++) {
                 if (bombeAttive[i] == NULL) {
-                    
-                    // 3. Sostituito il "2" fisso con p->getBombRange()!
+                    // Crea la bomba con il raggio potenziato
                     bombeAttive[i] = new Bomb(p->getX(), p->getY(), currentMap->getWin(), p->getBombRange(), false);
                     break;
                 }
@@ -195,7 +201,7 @@ void GameEngine::checkItemCollisions() {
     if (currentMap->GetPos(pY, pX) == 5) {
         
         // 1. Sceglie un potenziamento casuale e lo applica
-        int tipoCasuale = 5;
+        int tipoCasuale = rand() % 5 + 1; // Genera un numero casuale tra 1 e 5
         Item powerup(tipoCasuale);
         powerup.applyEffect(p);
         
@@ -233,6 +239,7 @@ void GameEngine::resetGameVariables() {
     }
 }
 
+// Funzione per mostrare la schermata di Game Over e attendere l'input dell'utente
 void GameEngine::showGameOverScreen() {
     
     // Pulisce brutalmente tutto lo schermo
@@ -416,6 +423,7 @@ void GameEngine::run() {
                     currentMap = &manager.nextLevel(yMax);
                     p->resetPosition();
                     p->resetLevelFlags();
+                    p->resetPowerups(); // Resetta i potenziamenti del giocatore quando passa al livello successivo, prevenendo accumuli di bonus
                     setupGameScreen();    
                     
                     // 2. CARICA O GENERA NEMICI PER LA NUOVA MAPPA
@@ -454,6 +462,7 @@ void GameEngine::run() {
                     currentMap = &manager.prevLevel();
                     p->resetPosition();
                     p->resetLevelFlags();
+                    p->resetPowerups(); // Resetta i potenziamenti del giocatore quando torna indietro di livello
                     setupGameScreen();    
                     
                     // 2. RIPRISTINA I NEMICI DEL LIVELLO PRECEDENTE
@@ -545,8 +554,16 @@ void GameEngine::run() {
 
                 // 4. Fai apparire la porta
                 if (tuttiMorti == true && currentMap->GetPos(pY, pX) == 0) {
-                    currentMap->setPos(pY, pX, 3);       // Piazza la porta
-                    currentMap->RedrawCell(pY, pX);      // Disegnala a schermo
+                    currentMap->setPos(pY, pX, 3);       // Piazza la porta nella matrice
+                    
+                    // Accende il colore 4 (quello che hai assegnato alla porta)
+                    wattron(currentMap->getWin(), COLOR_PAIR(3));
+                    
+                    // Ridisegna la cella, che ora prenderà il colore attivo
+                    currentMap->RedrawCell(pY, pX);      
+                    
+                    // Spegne il colore per evitare che contamini il resto della finestra
+                    wattroff(currentMap->getWin(), COLOR_PAIR(3));
                 }
                 // ==========================================================
                 }

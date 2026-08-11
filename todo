@@ -7,12 +7,11 @@ migliorare l'estetica generale, aggiungendo colori e blocchi per i muri
 rimuovi override da enemy.hpp
 crea il file e la classe per settare la BFS
 fai la schermata di game over con scritta più grande
+Inserire un timer per il countdown dei powerups
 
 
-inserisci che i potenziamenti degli oggetti si tolgono quando si passa al livello successivo, si muore o passa un tot di tempo (questo forse)
-sistema il fatto che il giocatore inizia con una sola bomba piazzabile al massimo e non 3
-metti che la bomba non si può piazzare sopra al muro
-cambia il colore del giocatore e degli oggetti
+
+sistema che quando muori devi impedire di poter piazzare le bombe finchè non è finita l'animazione di morte
 
 Leggi bene le modifiche ai bottoni per quando cambiano dimensione da schiacciati
 Fixa i file hpp controllando che tutte le variabili siano protected e che le funzioni siano public e che non ci siano override
@@ -20,4 +19,4 @@ Rimuovi metodi virtuali
 Guarda tutti i const che vengono utilizzati
 Sistema i nemici, fai tornare i 4 tipi di nemici diversi
 Capisci bene come mai i nemici non spawnano quando torni indietro con il livello e capisci perchè è una feature
-
+Sisteema i simboli della legenda

@@ -134,10 +134,8 @@ void Map::initmap(int livelloReale) {
     // Porta livello precedente (<)
     if (NLivello > 1) {
         map[2][2] = 4;  
-    }
-
-        // Porta livello successivo (utile per debugging)
-        map[3][2] = 3;  
+    }  
+    
 
 
     // 8. NASCONDI I POWERUPS
@@ -223,6 +221,27 @@ void Map::renderPos(int y, int x){
         wattroff(getWin(), COLOR_PAIR(11) );
      
     } 
+
+    // Disegna la porta del livello successivo (>)
+    else if (valore == 3) {
+        wattron(getWin(), COLOR_PAIR(3)); 
+        mvwaddch(getWin(), y, x, '>');    // La disegniamo colorata
+        wattroff(getWin(), COLOR_PAIR(3));
+    }
+    
+    // Disegna la porta del livello precedente (<)
+    else if (valore == 4) {
+        wattron(getWin(), COLOR_PAIR(3)); 
+        mvwaddch(getWin(), y, x, '<');    // La disegniamo colorata
+        wattroff(getWin(), COLOR_PAIR(3));
+    }
+
+    else if (valore == 5) {
+        // Disegna il power-up nascosto (dollaro) con colore speciale
+        wattron(getWin(), COLOR_PAIR(5));   // Attiva solo il colore base
+        mvwaddch(getWin(), y, x, '$');      // Stampa il dollaro
+        wattroff(getWin(), COLOR_PAIR(5));  // Spegne il colore
+    }
     
     else {
         // Per tutti gli altri elementi usa la legenda standard

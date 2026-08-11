@@ -131,9 +131,16 @@ int Player::getmv(Map &Mappa) {
     return choice;
 }
 
-// Disegna il giocatore nella sua posizione corrente
+// Disegna il giocatore nella sua posizione corrente e applica il colore e l'attributo BOLD
 void Player::display() {
-    mvwaddch(curwin, yLoc, xLoc, character);
+    // Attiva il Colore 1 (Ciano)
+    wattron(curwin, COLOR_PAIR(4)); 
+    
+    // Stampa il giocatore (es. la lettera 'P' o il carattere che usi tu)
+    mvwaddch(curwin, yLoc, xLoc, '@'); 
+    
+    // Spegne il colore, altrimenti colorerà tutto il resto dello schermo!
+    wattroff(curwin, COLOR_PAIR(4));
 }
 
 // Ciclo di gioco: visualizza e aspetta input fino a 'x' (non usato nel progetto attuale)
@@ -255,6 +262,7 @@ int Player::getLife(){
 void Player::addScore(int points) { 
     Score += points; 
 }
+
 int Player::getScore() { 
     return Score; 
 }
@@ -262,7 +270,7 @@ int Player::getScore() {
 void Player::resetStats() {
     Score = 0;
     Life = 3;
-    maxBombs = 1;
+    maxBombs = 3;
     bombRange = 1;
     wallPass = false;
 }
@@ -300,4 +308,10 @@ int Player::getBombRange() {
 
 bool Player::hasWallPass() {
     return wallPass; 
+}
+
+void Player::resetPowerups() {
+    maxBombs = 3;
+    bombRange = 1;
+    wallPass = false;
 }

@@ -56,6 +56,7 @@ public:
     int getScore();
     
     void resetStats();
+    void resetPowerups(); // Resetta i potenziamenti del giocatore
 
     void setHitByExplosion(bool state);
     bool getHitByExplosion();

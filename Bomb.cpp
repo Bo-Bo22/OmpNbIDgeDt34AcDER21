@@ -103,7 +103,7 @@ bool Bomb::update(Map &Mappa, Player &Pl, Enemy** En, int n_nemici) {
         }
 
         // =======================================================
-        // FASE 3: RIMOZIONE MURI E SPAWN DEGLI OGGETTI (LA MAGIA)
+        // FASE 3: RIMOZIONE MURI E SPAWN DEGLI OGGETTI
         // =======================================================
         
         // Se la fiamma è rimasta a schermo abbastanza tempo, ripuliamo

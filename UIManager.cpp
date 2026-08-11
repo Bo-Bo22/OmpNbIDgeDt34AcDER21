@@ -22,6 +22,10 @@ void UIManager::initializeUI() {
         // Coppia 2: Testo Rosso su Sfondo Nero (Per il lampeggiamento)
         init_pair(2, COLOR_RED, COLOR_BLACK);
 
+        init_pair(3, COLOR_GREEN, COLOR_BLACK);      // Coppia 3: Verde su Nero, per le porte
+        init_pair(4, COLOR_CYAN, COLOR_BLACK);       // Coppia 4: Ciano su Nero, per il giocatore
+        init_pair(5, COLOR_YELLOW, COLOR_BLACK);     // Coppia 5: Giallo su Nero, per gli oggetti ($)
+
         init_pair(6, COLOR_RED, COLOR_BLACK);        // Coppia 6: Rosso su Nero (es. per il Chaser)
         init_pair(7, COLOR_YELLOW, COLOR_BLACK);    // Coppia 7: Giallo su Nero per il Random)
         init_pair(8, COLOR_CYAN, COLOR_BLACK);      // Coppia 8: Cyan su Nero per il Basic)
