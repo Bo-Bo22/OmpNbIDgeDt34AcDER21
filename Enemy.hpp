@@ -63,7 +63,18 @@ public:
 
 
 // ============================================================================
-// Sottoclasse: RandomEnemy (Il nemico imprevedibile, di colore giallo)
+// Sottoclasse 1: BasicEnemy (Il nemico standard)
+// ============================================================================
+class BasicEnemy : public Enemy {
+public:
+    BasicEnemy(int x, int y, char c, WINDOW *win, Direction dir, int cp) :
+        Enemy(x, y, c, win, dir, cp) {}
+        
+    void update(Map &Mappa, Player &pl);
+};
+
+// ============================================================================
+// Sottoclasse 2: RandomEnemy (Il nemico imprevedibile)
 // ============================================================================
 class RandomEnemy : public Enemy {
 public:
@@ -71,5 +82,35 @@ public:
         Enemy(x, y, c, win, dir, cp) {}
         
     void update(Map &Mappa, Player &pl);
+};
+
+// ============================================================================
+// Sottoclasse 3: ChaserEnemy (L'inseguitore intelligente)
+// ============================================================================
+class ChaserEnemy : public Enemy {
+public:
+    ChaserEnemy(int x, int y, char c, WINDOW *win, Direction dir, int cp) :
+        Enemy(x, y, c, win, dir, cp) {
+            MoveInterval = 300; // Leggermente più lento per bilanciare l'IA infallibile
+        }
+            
+    void update(Map &Mappa, Player &pl);
+    
+private:
+    // Metodo privato che esegue l'algoritmo del percorso minimo
+    Direction performBFS(Player &Pl, Map &Mappa);
+};
+
+// ============================================================================
+// Sottoclasse 4: EasyChaserEnemy (L'inseguitore "stupido")
+// ============================================================================
+class EasyChaserEnemy : public Enemy {
+public:
+    EasyChaserEnemy(int x, int y, char c, WINDOW *win, Direction dir, int cp) :
+        Enemy(x, y, c, win, dir, cp) {}
+        
+    void update(Map &Mappa, Player &pl);
+    bool MoveToPlayer(Map &Mappa, Player &pl); 
+
 };
 #endif

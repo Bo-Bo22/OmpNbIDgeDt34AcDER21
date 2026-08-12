@@ -113,7 +113,15 @@ void GameEngine::generateEnemies() {
         
         Enemy* nuovoNemico = NULL;
         
-        nuovoNemico = new RandomEnemy(0, 0, 'E', currentMap->getWin(), Direction::RIGHT, 7); 
+        if (i % 4 == 0) {
+            nuovoNemico = new BasicEnemy(0, 0, 'B', currentMap->getWin(), Direction::RIGHT, 7); 
+        } else if (i % 4 == 1) {
+            nuovoNemico = new EasyChaserEnemy(0, 0, 'R', currentMap->getWin(), Direction::DOWN, 7); 
+        } else if (i % 4 == 2) {
+            nuovoNemico = new RandomEnemy(0, 0, 'E', currentMap->getWin(), Direction::LEFT, 7); 
+        } else {
+            //nuovoNemico = new ChaserEnemy(0, 0, 'C', currentMap->getWin(), Direction::RIGHT, 7); 
+        }
         
         // Ora la chiamata è sicura al 100%
         nuovoNemico->spawna_casuale(*currentMap, arrayNemici, i);
@@ -511,6 +519,9 @@ void GameEngine::run() {
                     }
                     
                     resetGameVariables(); 
+
+                    // Pulisce eventuali input residui nel buffer per evitare che il tasto premuto in precedenza venga catturato
+                    flushinp();
                 }
                 else{
 

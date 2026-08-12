@@ -22,9 +22,7 @@ protected:
 
     //legenda degli elementi della mappa.
     char legenda[16] = {' ', '#', '+', '>', '<', // elementi basilari
-                      '$', 'U', 'F', 'S', 'H',
-                      '+', '+', '+', '+', '+',
-                      '+'};     // power-up
+                      '$'};     // power-up
 
     WINDOW* playwin;
 
