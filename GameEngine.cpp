@@ -362,6 +362,14 @@ void GameEngine::showLeaderboard() {
     clear();
 }
 
+// Invece di restituire tutto l'array, creiamo un metodo che restituisce il singolo nemico
+Enemy* GameEngine::getNemico(int indice) { 
+    if (indice >= 0 && indice < numeroNemici) {
+        return arrayNemici[indice]; 
+    }
+    return NULL;
+    }
+
 // Il Game Loop Principale
 void GameEngine::run() {
     while (true) {

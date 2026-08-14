@@ -165,42 +165,10 @@ void Map::refresh() {
     wrefresh(playwin);
 }
 
-// Ritorna il valore della cella alla posizione (y, x)
-int Map::GetPos(int y, int x) {
-    return map[y][x];
-}
-
-// Ritorna il numero del livello corrente
-int Map::GetLvlN() {
-    return NLivello;
-}
-
-// Ritorna il carattere da visualizzare per una cella specifica
-char Map::GetMapChar(int y, int x) {
-    if (y < 0 || y >= righe || x < 0 || x >= colonne) {
-        return ' ';
-    }
-    
-    int cellValue = map[y][x];
-    switch (cellValue) {
-        case 0: return ' ';   // Spazio vuoto
-        case 1: return '#';   // Muro indistruttibile
-        case 2: return '+';   // Muro distruttibile
-        case 3: return '>';   // Porta livello successivo
-        case 4: return '<';   // Porta livello precedente
-        default: return ' ';
-    }
-}
-
 // Ridisegna una singola cella della mappa con il suo contenuto
 void Map::RedrawCell(int y, int x) {
     if (y < 0 || y >= righe || x < 0 || x >= colonne) return;
     renderPos(y, x); // Disegnerà lo spazio colorato se è muro, o il carattere se è altro
-}
-
-// Ritorna il puntatore alla finestra di ncurses della mappa
-WINDOW* Map::getWin() {
-    return playwin;
 }
 
 // Imposta il valore della cella alla posizione (y, x)
@@ -267,4 +235,49 @@ void Map::renderLevel() {
         }
     }
     wrefresh(playwin);
+}
+
+//===========================
+// Metodi getter
+//===========================
+int Map::getPortaY() { return portaY; }
+
+int Map::getPortaX() { return portaX; }
+
+int Map::getOggettoNascosto(int y, int x) {return oggettiNascosti[y][x]; }
+
+int Map::getWidth() { return colonne; }
+
+int Map::getHeight() { return righe; }
+
+// Ritorna il puntatore alla finestra di ncurses della mappa
+WINDOW* Map::getWin() {
+    return playwin;
+}
+
+// Ritorna il valore della cella alla posizione (y, x)
+int Map::GetPos(int y, int x) {
+    return map[y][x];
+}
+
+// Ritorna il numero del livello corrente
+int Map::GetLvlN() {
+    return NLivello;
+}
+
+// Ritorna il carattere da visualizzare per una cella specifica
+char Map::GetMapChar(int y, int x) {
+    if (y < 0 || y >= righe || x < 0 || x >= colonne) {
+        return ' ';
+    }
+    
+    int cellValue = map[y][x];
+    switch (cellValue) {
+        case 0: return ' ';   // Spazio vuoto
+        case 1: return '#';   // Muro indistruttibile
+        case 2: return '+';   // Muro distruttibile
+        case 3: return '>';   // Porta livello successivo
+        case 4: return '<';   // Porta livello precedente
+        default: return ' ';
+    }
 }

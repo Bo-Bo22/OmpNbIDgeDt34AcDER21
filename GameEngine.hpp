@@ -67,13 +67,7 @@ public:
 
     bool checkBombCollisions(); // Controlla se il giocatore è stato colpito da un'esplosione
     
-    // Invece di restituire tutto l'array, creiamo un metodo che restituisce il singolo nemico
-    Enemy* getNemico(int indice) { 
-        if (indice >= 0 && indice < numeroNemici) {
-            return arrayNemici[indice]; 
-        }
-        return NULL;
-    }
+    Enemy* getNemico(int indice);
 };
 
 #endif

@@ -21,7 +21,7 @@ protected:
     int oggettiNascosti[20][40];
 
     //legenda degli elementi della mappa.
-    char legenda[16] = {' ', '#', '+', '>', '<', // elementi basilari
+    char legenda[6] = {' ', '#', '+', '>', '<', // elementi basilari
                       '$'};     // power-up
 
     WINDOW* playwin;
@@ -47,8 +47,8 @@ public:
 
     WINDOW* getWin();
     
-    static int getWidth() { return colonne; }
-    static int getHeight() { return righe; }
+    int getWidth();
+    int getHeight();
 
 
     //funzione che disegna la mappa a partire dalla matrice map.
@@ -62,9 +62,9 @@ public:
     void setPos(int y, int x, int val);
 
     //metodi getter
-    int getPortaY() { return portaY; }
-    int getPortaX() { return portaX; }
-    int getOggettoNascosto(int y, int x) {return oggettiNascosti[y][x]; }
+    int getPortaY();
+    int getPortaX();
+    int getOggettoNascosto(int y, int x);
 
 };
 
