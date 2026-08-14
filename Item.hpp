@@ -4,7 +4,7 @@
 #include "Player.hpp"
 
 class Item {
-private:
+protected:
     int type; // 1 = Punti/Vita, 2 = Bomba Extra, 3 = Raggio, ecc.
 
 public:

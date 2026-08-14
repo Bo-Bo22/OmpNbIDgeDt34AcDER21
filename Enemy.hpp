@@ -79,7 +79,8 @@ public:
 class RandomEnemy : public Enemy {
 public:
     RandomEnemy(int x, int y, char c, WINDOW *win, Direction dir, int cp) :
-        Enemy(x, y, c, win, dir, cp) {}
+        Enemy(x, y, c, win, dir, cp) {
+        }
         
     void update(Map &Mappa, Player &pl);
 };
@@ -91,7 +92,7 @@ class ChaserEnemy : public Enemy {
 public:
     ChaserEnemy(int x, int y, char c, WINDOW *win, Direction dir, int cp) :
         Enemy(x, y, c, win, dir, cp) {
-            MoveInterval = 250; // Leggermente lento per bilanciare l'IA infallibile, in realtà è facile da sconfiggere
+            MoveInterval = 250; // Leggermente più lento per bilanciare l'IA infallibile, in realtà è facile da
     }
     // Metodo privato che esegue l'algoritmo del percorso minimo
     Direction performBFS(Player &Pl, Map &Mappa);
@@ -105,7 +106,8 @@ public:
 class EasyChaserEnemy : public Enemy {
 public:
     EasyChaserEnemy(int x, int y, char c, WINDOW *win, Direction dir, int cp) :
-        Enemy(x, y, c, win, dir, cp) {}
+        Enemy(x, y, c, win, dir, cp) {
+        }
         
     void update(Map &Mappa, Player &pl);
     bool MoveToPlayer(Map &Mappa, Player &pl); 

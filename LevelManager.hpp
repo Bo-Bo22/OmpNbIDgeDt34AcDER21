@@ -2,7 +2,7 @@
 #ifndef LEVELMANAGER_HPP
 #define LEVELMANAGER_HPP
 
-class Map;
+#include "Map.hpp"
 
 struct LivelloNode {
     int numeroLivello;
