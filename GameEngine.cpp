@@ -39,6 +39,7 @@ void GameEngine::setupGameScreen() {
 
     touchwin(currentMap->getWin());
     currentMap->refresh();
+
     p->display();
     wrefresh(currentMap->getWin());
 }
@@ -116,11 +117,11 @@ void GameEngine::generateEnemies() {
         if (i % 4 == 0) {
             nuovoNemico = new BasicEnemy(0, 0, 'B', currentMap->getWin(), Direction::RIGHT, 7); 
         } else if (i % 4 == 1) {
-            nuovoNemico = new EasyChaserEnemy(0, 0, 'R', currentMap->getWin(), Direction::DOWN, 7); 
+            nuovoNemico = new EasyChaserEnemy(0, 0, 'E', currentMap->getWin(), Direction::DOWN, 7); 
         } else if (i % 4 == 2) {
-            nuovoNemico = new RandomEnemy(0, 0, 'E', currentMap->getWin(), Direction::LEFT, 7); 
+            nuovoNemico = new ChaserEnemy(0, 0, 'C', currentMap->getWin(), Direction::RIGHT, 7);
         } else {
-            //nuovoNemico = new ChaserEnemy(0, 0, 'C', currentMap->getWin(), Direction::RIGHT, 7); 
+            nuovoNemico = new RandomEnemy(0, 0, 'R', currentMap->getWin(), Direction::LEFT, 7);
         }
         
         // Ora la chiamata è sicura al 100%
@@ -503,7 +504,7 @@ void GameEngine::run() {
                 bool isHit = checkEnemyCollisions() || checkBombCollisions();
 
                 if (isHit) {
-                    p->erase(*currentMap);
+                    // Il giocatore è stato colpito da un nemico o da un'esplosione, non si fa l'erase della cella precedente per evitare glitch grafici
                     p->Death(true); 
 
                     if (p->getLife() <= 0) {

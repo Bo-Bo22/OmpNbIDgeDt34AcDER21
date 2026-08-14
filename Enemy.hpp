@@ -91,7 +91,7 @@ class ChaserEnemy : public Enemy {
 public:
     ChaserEnemy(int x, int y, char c, WINDOW *win, Direction dir, int cp) :
         Enemy(x, y, c, win, dir, cp) {
-            MoveInterval = 300; // Leggermente più lento per bilanciare l'IA infallibile
+            MoveInterval = 250; // Leggermente lento per bilanciare l'IA infallibile, in realtà è facile da sconfiggere
     }
     // Metodo privato che esegue l'algoritmo del percorso minimo
     Direction performBFS(Player &Pl, Map &Mappa);

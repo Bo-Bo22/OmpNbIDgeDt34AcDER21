@@ -141,14 +141,25 @@ void ChaserEnemy::update(Map &Mappa, Player &Pl) {
     
     if (elapsed < MoveInterval) return; 
     lastMove = now;
+
+    int deltaX = Pl.getX() - XLoc;
+    int deltaY = Pl.getY() - YLoc;
+
+    if (abs(deltaX) + abs(deltaY) == 1) {
+        if (deltaX == 1)       Dir = Direction::RIGHT;
+        else if (deltaX == -1) Dir = Direction::LEFT;
+        else if (deltaY == 1)  Dir = Direction::DOWN;
+        else if (deltaY == -1) Dir = Direction::UP;
+    } else {
     
     // 1. DICHIARAZIONE: Questa riga deve esserci ed essere fuori da eventuali graffe!
     BFS calcolatorePercorso;
     
     // 2. UTILIZZO: Ora il compilatore sa cos'è "calcolatorePercorso"
     Dir = calcolatorePercorso.getDirection(Pl, *this, Mappa); 
-    
+    }   
     MoveInCurrDirection(Mappa);   
+
 }
 
 void ChaserEnemy::spawna_casuale(Map &Mappa, Enemy** altri, int n) {
