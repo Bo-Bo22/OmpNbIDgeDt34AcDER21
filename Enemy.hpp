@@ -92,13 +92,11 @@ public:
     ChaserEnemy(int x, int y, char c, WINDOW *win, Direction dir, int cp) :
         Enemy(x, y, c, win, dir, cp) {
             MoveInterval = 300; // Leggermente più lento per bilanciare l'IA infallibile
-        }
-            
-    void update(Map &Mappa, Player &pl);
-    
-private:
+    }
     // Metodo privato che esegue l'algoritmo del percorso minimo
     Direction performBFS(Player &Pl, Map &Mappa);
+    void update(Map &Mappa, Player &Pl) override;
+    void spawna_casuale(Map &Mappa, Enemy** altri, int n) override;
 };
 
 // ============================================================================

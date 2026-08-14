@@ -1,31 +1,42 @@
-/*
+#include "BFS.hpp"
+// #include "ChaserEnemy.hpp" // Decommenta se la classe ChaserEnemy ha un suo file .hpp
+#include <cstdlib>
+#include <chrono>
+
 // ============================================================================
-// STRUTTURA E FUNZIONI PER LA GESTIONE MANUALE DELLA CODA (QUEUE) PER BFS
+// STRUTTURA E FUNZIONI PER LA GESTIONE MANUALE DELLA CODA OTTIMIZZATA
 // ============================================================================
 struct QueueNode {
     int x, y;
     QueueNode* next;
 };
-typedef QueueNode* pQueue;
 
-void enqueue(pQueue &c, int x, int y) {
-    pQueue tmp = new QueueNode;
+struct Queue {
+    QueueNode* head = NULL;
+    QueueNode* tail = NULL;
+};
+
+void enqueue(Queue &q, int x, int y) {
+    QueueNode* tmp = new QueueNode;
     tmp->x = x;
     tmp->y = y;
     tmp->next = NULL;
-    if (c == NULL) {
-        c = tmp;
-        return;
+    
+    if (q.head == NULL) {
+        q.head = tmp;
+        q.tail = tmp;
+    } else {
+        q.tail->next = tmp;
+        q.tail = tmp;
     }
-    pQueue tmp2 = c;
-    while(tmp2->next != NULL) tmp2 = tmp2->next;
-    tmp2->next = tmp;
 }
 
-void dequeue(pQueue &c) {
-    if (c == NULL) return;
-    pQueue tmp = c;
-    c = c->next;
+void dequeue(Queue &q) {
+    if (q.head == NULL) return;
+    QueueNode* tmp = q.head;
+    q.head = q.head->next;
+    
+    if (q.head == NULL) q.tail = NULL;
     delete tmp;
 }
 
@@ -36,34 +47,40 @@ struct connect {
 // ============================================================================
 // ALGORITMO DI VISITA IN AMPIEZZA (BFS) PER IL CHASER ENEMY
 // ============================================================================
-Direction BFS(Player &Pl, Enemy En, Map &Mappa) {
-    // Sincronizzato dinamicamente con le costanti statiche della classe Map per evitare overflow
-    int visited[20][40] = {};     
-    connect parent[20][40];       
+Direction BFS::getDirection(Player &Pl, Enemy &En, Map &Mappa) {
+    
+    const int MAX_Y = 100;
+    const int MAX_X = 150;
+    
+    int visited[MAX_Y][MAX_X] = {};     
+    connect parent[MAX_Y][MAX_X];       
     Direction dirs[4] = {Direction::UP, Direction::DOWN, Direction::LEFT, Direction::RIGHT};
     
     int dy[4] = {-1, 1, 0, 0};
     int dx[4] = {0, 0, -1, 1};
     
-    // Inizializzazione basata sui confini reali della mappa
-    for (int i = 0; i < Map::getHeight(); i++) {
-        for (int j = 0; j < Map::getWidth(); j++) {
+    int h = Map::getHeight();
+    int w = Map::getWidth();
+
+    // Inizializzazione sicura
+    for (int i = 0; i < h && i < MAX_Y; i++) {
+        for (int j = 0; j < w && j < MAX_X; j++) {
             parent[i][j].x = -1;
             parent[i][j].y = -1;
             visited[i][j] = 0;
         }
     }
     
-    pQueue next_step = NULL; 
+    Queue q; 
     visited[En.getY()][En.getX()] = 1;        
-    enqueue(next_step, En.getX(), En.getY()); 
+    enqueue(q, En.getX(), En.getY()); 
     
     bool found = false;
     
-    while (next_step != NULL && !found) {
-        int cx = next_step->x;
-        int cy = next_step->y;
-        dequeue(next_step);    
+    while (q.head != NULL && !found) {
+        int cx = q.head->x;
+        int cy = q.head->y;
+        dequeue(q);    
         
         if (cx == Pl.getX() && cy == Pl.getY()) {
             found = true;
@@ -74,18 +91,21 @@ Direction BFS(Player &Pl, Enemy En, Map &Mappa) {
             int nx = cx + dx[i];
             int ny = cy + dy[i];
             
-            // Controllo dei limiti basato sulla configurazione globale di Map
-            if (ny >= 0 && ny < Map::getHeight() && nx >= 0 && nx < Map::getWidth() &&
-                !visited[ny][nx] && Mappa.GetPos(ny, nx) == 0) {
-                visited[ny][nx] = 1;
-                parent[ny][nx].x = cx; 
-                parent[ny][nx].y = cy;
-                enqueue(next_step, nx, ny); 
+            if (ny >= 0 && ny < h && nx >= 0 && nx < w && !visited[ny][nx]) {
+                
+                bool isPlayer = (nx == Pl.getX() && ny == Pl.getY());
+                
+                if (Mappa.GetPos(ny, nx) == 0 || isPlayer) {
+                    visited[ny][nx] = 1;
+                    parent[ny][nx].x = cx; 
+                    parent[ny][nx].y = cy;
+                    enqueue(q, nx, ny); 
+                }
             }
         }
     }
     
-    while (next_step != NULL) dequeue(next_step);
+    while (q.head != NULL) dequeue(q);
     
     if (!found) return dirs[rand() % 4];
     
@@ -122,45 +142,63 @@ void ChaserEnemy::update(Map &Mappa, Player &Pl) {
     if (elapsed < MoveInterval) return; 
     lastMove = now;
     
-    Dir = BFS(Pl, *this, Mappa); 
+    // 1. DICHIARAZIONE: Questa riga deve esserci ed essere fuori da eventuali graffe!
+    BFS calcolatorePercorso;
+    
+    // 2. UTILIZZO: Ora il compilatore sa cos'è "calcolatorePercorso"
+    Dir = calcolatorePercorso.getDirection(Pl, *this, Mappa); 
+    
     MoveInCurrDirection(Mappa);   
 }
 
 void ChaserEnemy::spawna_casuale(Map &Mappa, Enemy** altri, int n) {
-    bool occupato = false;
     int h = Map::getHeight();
     int w = Map::getWidth();
+    bool piazzato = false;
     
-    // Sincronizzato con i confini reali di Map anziché YMax/XMax dello schermo esterno
-    for (int x = w - 2; x >= 1; x--) {
+    for (int x = w - 2; x >= 1 && !piazzato; x--) {
         if (Mappa.GetPos(h - 2, x) == 0) {
+            bool cellaLibera = true;
             for(int k = 0; k < n; k++) {
-                if(altri[k]->getX() == x && altri[k]->getY() == h - 2) {
-                    occupato = true;
+                if(altri[k] != nullptr && altri[k]->getX() == x && altri[k]->getY() == h - 2) {
+                    cellaLibera = false;
+                    break;
                 }
             }
-            if(!occupato) { YLoc = h - 2; XLoc = x; }
-        }
-    }
-    
-    if (!occupato) {
-        for (int y = h - 2; y >= 1; y--) {
-            if (Mappa.GetPos(y, w - 2) == 0) {
-                for(int k = 0; k < n; k++) {
-                    if(altri[k]->getY() == y && altri[k]->getX() == w - 2) {
-                        occupato = true;
-                    }
-                }
-                if(!occupato) { YLoc = y; XLoc = w - 2; }
+            if(cellaLibera) { 
+                YLoc = h - 2; 
+                XLoc = x; 
+                piazzato = true; 
             }
         }
     }
     
-    if (!occupato) {
-        do {
-            YLoc = rand() % (h - 2) + 1;
-            XLoc = rand() % (w - 2) + 1;
-        } while(Mappa.GetPos(YLoc, XLoc) != 0 || (YLoc <= 5 && XLoc <= 5));
+    for (int y = h - 2; y >= 1 && !piazzato; y--) {
+        if (Mappa.GetPos(y, w - 2) == 0) {
+            bool cellaLibera = true;
+            for(int k = 0; k < n; k++) {
+                if(altri[k] != nullptr && altri[k]->getY() == y && altri[k]->getX() == w - 2) {
+                    cellaLibera = false;
+                    break;
+                }
+            }
+            if(cellaLibera) { 
+                YLoc = y; 
+                XLoc = w - 2; 
+                piazzato = true; 
+            }
+        }
+    }
+    
+    while (!piazzato) {
+        int rndY = rand() % (h - 2) + 1;
+        int rndX = rand() % (w - 2) + 1;
+        
+        if (Mappa.GetPos(rndY, rndX) == 0 && (rndY > 5 || rndX > 5)) {
+            YLoc = rndY;
+            XLoc = rndX;
+            piazzato = true;
+        }
     }
     
     Direction dirs[4] = {Direction::UP, Direction::DOWN, Direction::LEFT, Direction::RIGHT};
@@ -173,4 +211,3 @@ void ChaserEnemy::spawna_casuale(Map &Mappa, Enemy** altri, int n) {
         }
     }
 }
-*/
