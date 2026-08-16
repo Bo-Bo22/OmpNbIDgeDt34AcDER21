@@ -1,5 +1,4 @@
 #include "UIManager.hpp"
-#include <ncurses.h>
 
 UIManager::UIManager() {}
 

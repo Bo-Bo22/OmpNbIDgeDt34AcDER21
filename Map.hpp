@@ -1,9 +1,9 @@
-#include <ncurses.h>
 #ifndef MAP_HPP
 #define MAP_HPP
 
 #include "UIManager.hpp"
 #include "Enemy.hpp"
+#include <ncurses.h>
 
 class Map {
 protected:
@@ -47,8 +47,8 @@ public:
 
     WINDOW* getWin();
     
-    int getWidth();
-    int getHeight();
+    static int getWidth();
+    static int getHeight();
 
 
     //funzione che disegna la mappa a partire dalla matrice map.

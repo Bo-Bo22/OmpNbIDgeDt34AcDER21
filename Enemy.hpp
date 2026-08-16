@@ -49,68 +49,14 @@ public:
     int getX() const;
     int getY() const;
     bool isAlive() const { return alive; }
+    char getSymbol();
     
     // Funzioni logiche, di pulizia e di rendering sul terminale
     bool MoveInCurrDirection(Map &Mappa);
     void kill(Map &Mappa);
     void display();
     void erase(Map &Mappa);
-    
-    // Metodi virtuali polimorfici specializzati nelle sottoclassi
-    virtual void update(Map &Mappa, Player &pl);
-    virtual void spawna_casuale(Map &Mappa, Enemy** altri, int n);
+    void spawna_casuale(Map &Mappa, Enemy** altri, int n);
 };
 
-
-// ============================================================================
-// Sottoclasse 1: BasicEnemy (Il nemico standard)
-// ============================================================================
-class BasicEnemy : public Enemy {
-public:
-    BasicEnemy(int x, int y, char c, WINDOW *win, Direction dir, int cp) :
-        Enemy(x, y, c, win, dir, cp) {}
-        
-    void update(Map &Mappa, Player &pl);
-};
-
-// ============================================================================
-// Sottoclasse 2: RandomEnemy (Il nemico imprevedibile)
-// ============================================================================
-class RandomEnemy : public Enemy {
-public:
-    RandomEnemy(int x, int y, char c, WINDOW *win, Direction dir, int cp) :
-        Enemy(x, y, c, win, dir, cp) {
-        }
-        
-    void update(Map &Mappa, Player &pl);
-};
-
-// ============================================================================
-// Sottoclasse 3: ChaserEnemy (L'inseguitore intelligente)
-// ============================================================================
-class ChaserEnemy : public Enemy {
-public:
-    ChaserEnemy(int x, int y, char c, WINDOW *win, Direction dir, int cp) :
-        Enemy(x, y, c, win, dir, cp) {
-            MoveInterval = 250; // Leggermente più lento per bilanciare l'IA infallibile, in realtà è facile da
-    }
-    // Metodo privato che esegue l'algoritmo del percorso minimo
-    Direction performBFS(Player &Pl, Map &Mappa);
-    void update(Map &Mappa, Player &Pl) override;
-    void spawna_casuale(Map &Mappa, Enemy** altri, int n) override;
-};
-
-// ============================================================================
-// Sottoclasse 4: EasyChaserEnemy (L'inseguitore "stupido")
-// ============================================================================
-class EasyChaserEnemy : public Enemy {
-public:
-    EasyChaserEnemy(int x, int y, char c, WINDOW *win, Direction dir, int cp) :
-        Enemy(x, y, c, win, dir, cp) {
-        }
-        
-    void update(Map &Mappa, Player &pl);
-    bool MoveToPlayer(Map &Mappa, Player &pl); 
-
-};
 #endif

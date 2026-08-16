@@ -12,6 +12,10 @@
 #include "Enemy.hpp"
 #include "MainMenu.hpp"
 #include "Item.hpp"
+#include "BasicEnemy.hpp"
+#include "EasyChaserEnemy.hpp"
+#include "ChaserEnemy.hpp"
+#include "RandomEnemy.hpp"
 
 class GameEngine {
 protected:
@@ -57,7 +61,7 @@ public:
     
     void run(); // Il ciclo principale
 
-    int getNumeroNemici() { return numeroNemici; }
+    int getNumeroNemici();
 
     void showGameOverScreen();
 

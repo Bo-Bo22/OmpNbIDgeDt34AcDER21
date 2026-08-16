@@ -1,7 +1,4 @@
 #include "Map.hpp"
-#include "UIManager.hpp"
-#include "Enemy.hpp"
-#include <cstdlib> //utile per rand e srand
 
 // Costruttore: crea una finestra per la mappa e la centra sullo schermo
 Map::Map(int yMax) {

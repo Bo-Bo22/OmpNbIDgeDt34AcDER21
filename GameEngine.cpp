@@ -1,5 +1,4 @@
 #include "GameEngine.hpp"
-#include "UIManager.hpp"
 
 // Costruttore
 GameEngine::GameEngine(int y, int x) {
@@ -22,6 +21,11 @@ GameEngine::GameEngine(int y, int x) {
 
     timerRunning = false;
     int maxLevelReached = 1;
+}
+
+// Funzione per ottenere il numero di nemici attivi
+int GameEngine::getNumeroNemici() {
+    return numeroNemici; 
 }
 
 // Funzione grafica per disegnare la cornice
@@ -368,7 +372,8 @@ Enemy* GameEngine::getNemico(int indice) {
         return arrayNemici[indice]; 
     }
     return NULL;
-    }
+}
+
 
 // Il Game Loop Principale
 void GameEngine::run() {
@@ -500,7 +505,27 @@ void GameEngine::run() {
                 // Aggiorna e disegna tutti i nemici in vita
                 for (int i = 0; i < numeroNemici; i++) {
                     if (arrayNemici[i] != NULL && arrayNemici[i]->isAlive()) {
-                        arrayNemici[i]->update(*currentMap, *p); 
+
+
+                        char sym = arrayNemici[i]->getSymbol();
+
+                        if (sym == 'C') {
+                            // Chaser Enemy (Inseguitore con BFS)
+                            ((ChaserEnemy*)arrayNemici[i])->update(*currentMap, *p);
+                        } 
+                        else if (sym == 'R') {
+                            // Random Enemy (Movimento casuale)
+                            ((RandomEnemy*)arrayNemici[i])->update(*currentMap, *p);
+                        } 
+                        else if (sym == 'E') {
+                            // Easy Chaser Enemy (Inseguitore Greedy)
+                            ((EasyChaserEnemy*)arrayNemici[i])->update(*currentMap, *p);
+                        } 
+                        else if (sym == 'B') {
+                            // Basic Enemy (Movimento lineare)
+                            ((BasicEnemy*)arrayNemici[i])->update(*currentMap, *p);
+                        }
+
                         arrayNemici[i]->display();               
                     }
                 }

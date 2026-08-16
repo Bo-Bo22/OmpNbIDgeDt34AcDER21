@@ -1,8 +1,4 @@
-#include "Map.hpp" 
 #include "MainMenu.hpp" 
-#include "Button.hpp" 
-#include <ncurses.h> 
-#include <cstring>
 
 using namespace std;
 

@@ -7,7 +7,8 @@ crea il file e la classe per settare la BFS
 Inserire un timer per il countdown dei powerups
 
 
-Chaser enemy implementato con bfs
+Fixa tutte queste paroline: static, const
+Osserva meglio come funziona la leaderboard
 
 
 Leggi bene le modifiche ai bottoni per quando cambiano dimensione da schiacciati
