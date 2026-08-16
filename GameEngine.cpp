@@ -123,7 +123,7 @@ void GameEngine::generateEnemies() {
         } else if (i % 4 == 1) {
             nuovoNemico = new EasyChaserEnemy(0, 0, 'E', currentMap->getWin(), Direction::DOWN, 7); 
         } else if (i % 4 == 2) {
-            nuovoNemico = new ChaserEnemy(0, 0, 'C', currentMap->getWin(), Direction::RIGHT, 7);
+            nuovoNemico = new ChaserEnemy(0, 0, 'C', currentMap->getWin(), Direction::RIGHT, 250, 7);
         } else {
             nuovoNemico = new RandomEnemy(0, 0, 'R', currentMap->getWin(), Direction::LEFT, 7);
         }

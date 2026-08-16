@@ -1,22 +1,38 @@
 #include "ChaserEnemy.hpp"
+#include "Map.hpp"
+#include "Player.hpp"
+#include <cstdlib>
 
+// ============================================================================
+// COSTRUTTORE (Il simbolo che mancava al Linker)
+// ============================================================================
+ChaserEnemy::ChaserEnemy(int startX, int startY, char sym, WINDOW* win, Direction dir, int moveInterval, int cp)
+    : Enemy(startX, startY, sym, win, dir, cp) {
+    lastMove = std::chrono::steady_clock::now();
+    
+    MoveInterval = 200; // Bilanciamento all'IA infallibile
+}
+
+// ============================================================================
+// STRUTTURE PER LA CODA DELLA BFS (Senza STL)
+// ============================================================================
 struct QueueNode {
     int x, y;
     QueueNode* next;
 };
 
 struct Queue {
-    QueueNode* head = NULL;
-    QueueNode* tail = NULL;
+    QueueNode* head = nullptr;
+    QueueNode* tail = nullptr;
 };
 
 static void enqueue(Queue &q, int x, int y) {
     QueueNode* tmp = new QueueNode;
     tmp->x = x;
     tmp->y = y;
-    tmp->next = NULL;
+    tmp->next = nullptr;
     
-    if (q.head == NULL) {
+    if (q.head == nullptr) {
         q.head = tmp;
         q.tail = tmp;
     } else {
@@ -26,11 +42,11 @@ static void enqueue(Queue &q, int x, int y) {
 }
 
 static void dequeue(Queue &q) {
-    if (q.head == NULL) return;
+    if (q.head == nullptr) return;
     QueueNode* tmp = q.head;
     q.head = q.head->next;
     
-    if (q.head == NULL) q.tail = NULL;
+    if (q.head == nullptr) q.tail = nullptr;
     delete tmp;
 }
 
@@ -39,7 +55,7 @@ struct connect {
 };
 
 // ============================================================================
-// ALGORITMO BFS INTEGRATO IN CHASER ENEMY
+// ALGORITMO DI VISITA IN AMPIEZZA (BFS)
 // ============================================================================
 Direction ChaserEnemy::calcolaBFS(Player &Pl, Map &Mappa) {
     const int MAX_Y = 100;
@@ -69,7 +85,7 @@ Direction ChaserEnemy::calcolaBFS(Player &Pl, Map &Mappa) {
     
     bool found = false;
     
-    while (q.head != NULL && !found) {
+    while (q.head != nullptr && !found) {
         int cx = q.head->x;
         int cy = q.head->y;
         dequeue(q);    
@@ -95,7 +111,7 @@ Direction ChaserEnemy::calcolaBFS(Player &Pl, Map &Mappa) {
         }
     }
     
-    while (q.head != NULL) dequeue(q);
+    while (q.head != nullptr) dequeue(q);
     
     if (!found) return dirs[rand() % 4];
     
@@ -117,7 +133,7 @@ Direction ChaserEnemy::calcolaBFS(Player &Pl, Map &Mappa) {
 }
 
 // ============================================================================
-// AGGIORNAMENTO DEL NEMICO
+// AGGIORNAMENTO DEL CHASER
 // ============================================================================
 void ChaserEnemy::update(Map &Mappa, Player &pl) {
     if (!isAlive()) {
@@ -131,8 +147,38 @@ void ChaserEnemy::update(Map &Mappa, Player &pl) {
     if (elapsed < MoveInterval) return; 
     lastMove = now;
     
-    // Chiamata diretta al metodo interno di classe
     Dir = calcolaBFS(pl, Mappa); 
-    
     MoveInCurrDirection(Mappa);   
+}
+
+// ============================================================================
+// POSIZIONAMENTO CASUALE LONTANO DALLO SPAWN
+// ============================================================================
+void ChaserEnemy::spawna_casuale(Map &Mappa, Enemy** altri, int n) {
+    int h = Map::getHeight();
+    int w = Map::getWidth();
+    bool piazzato = false;
+    
+    while (!piazzato) {
+        int ry = rand() % (h - 2) + 1;
+        int rx = rand() % (w - 2) + 1;
+        
+        // Evita la safe zone (3x5 in alto a sinistra)
+        if (ry <= 3 && rx <= 5) continue;
+        
+        if (Mappa.GetPos(ry, rx) == 0) {
+            bool occupato = false;
+            for (int i = 0; i < n; i++) {
+                if (altri[i] != nullptr && altri[i]->getX() == rx && altri[i]->getY() == ry) {
+                    occupato = true;
+                    break;
+                }
+            }
+            if (!occupato) {
+                XLoc = rx;
+                YLoc = ry;
+                piazzato = true;
+            }
+        }
+    }
 }
