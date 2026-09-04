@@ -501,6 +501,12 @@ void GameEngine::run() {
                 drawHUD();
                 currentMap->refresh();
                 p->display();
+
+                // 1. Disegna il giocatore solo se NON è appena stato investito dall'esplosione,
+                // evitando di cancellare la scia di fuoco '*'
+                if (!p->getHitByExplosion()) {
+                    p->display();
+                }
                 
                 // Aggiorna e disegna tutti i nemici in vita
                 for (int i = 0; i < numeroNemici; i++) {
@@ -534,9 +540,30 @@ void GameEngine::run() {
                 checkItemCollisions();
                 
                 // --- CONTROLLO COLLISIONI PULITO ---
+                bool colpoDaBomba = p->getHitByExplosion(); // Salviamo la causa della morte
                 bool isHit = checkEnemyCollisions() || checkBombCollisions();
 
                 if (isHit) {
+
+                    int morteY = p->getY();
+                    int morteX = p->getX();
+
+                    // 2. Pulizia immediata della casella di morte prima del respawn
+                    if (colpoDaBomba) {
+                        // Sovrascrive il giocatore con la fiammata della bomba
+                        mvwaddch(currentMap->getWin(), morteY, morteX, '*');
+                        wrefresh(currentMap->getWin());
+                    } else {
+                        // Morte da nemico: RIDISEGNA i nemici invece di fare erase!
+                        // Il nemico sovrascrive il '@' del player e rimane visibile a schermo
+                        for (int i = 0; i < numeroNemici; i++) {
+                            if (arrayNemici[i] != NULL && arrayNemici[i]->isAlive()) {
+                                arrayNemici[i]->display();
+                            }
+                        }
+                        wrefresh(currentMap->getWin());
+                    }
+
                     // Il giocatore è stato colpito da un nemico o da un'esplosione, non si fa l'erase della cella precedente per evitare glitch grafici
                     p->Death(true); 
 
@@ -550,6 +577,14 @@ void GameEngine::run() {
                         // RESPAWN CON VITE RIMANENTI
                         p->resetPosition();
                         setupGameScreen();
+
+                        // Ridisegna subito i nemici dopo la pulizia dello schermo
+                        for (int i = 0; i < numeroNemici; i++) {
+                            if (arrayNemici[i] != NULL && arrayNemici[i]->isAlive()) {
+                                arrayNemici[i]->display();
+                            }
+                        }
+                        wrefresh(currentMap->getWin());
                     }
                     
                     resetGameVariables(); 
