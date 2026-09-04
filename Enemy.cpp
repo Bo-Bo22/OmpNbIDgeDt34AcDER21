@@ -147,3 +147,7 @@ int Enemy::getX() const { return XLoc; }
 char Enemy::getSymbol() {
     return character;
 }
+
+bool Enemy::isAlive() const {
+    return alive;
+}

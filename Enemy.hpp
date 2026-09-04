@@ -48,7 +48,7 @@ public:
     // Getters stabili in sola lettura
     int getX() const;
     int getY() const;
-    bool isAlive() const { return alive; }
+    bool isAlive() const;
     char getSymbol();
     
     // Funzioni logiche, di pulizia e di rendering sul terminale

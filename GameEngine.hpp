@@ -65,6 +65,8 @@ public:
 
     void showGameOverScreen();
 
+    void showVictoryScreen();
+
     void saveScore();
 
     void showLeaderboard();

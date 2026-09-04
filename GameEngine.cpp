@@ -162,7 +162,7 @@ void GameEngine::drawHUD() {
     int tempoRimanente = 2000; // Valore massimo di partenza
     
     if (timerRunning) {
-        auto now = std::chrono::steady_clock::now();
+        std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
         int tempoTrascorso = std::chrono::duration_cast<std::chrono::seconds>(now - startTime).count();
         
         // Sottraiamo il tempo trascorso dal valore iniziale
@@ -280,89 +280,148 @@ void GameEngine::showGameOverScreen() {
     clear(); 
 }
 
-// Funzione per salvare il punteggio del giocatore in un file di testo
-void GameEngine::saveScore() {
-    int punteggioFinale = p->getScore();
-    
-    // Non salviamo i punteggi a zero
-    if (punteggioFinale <= 0) return; 
+// Funzione per mostrare la schermata di Vittoria dopo 10 livelli
+void GameEngine::showVictoryScreen() {
+    clear();
 
-    // Crea un oggetto ofstream in modalità 'app' (append) per non sovrascrivere
-    std::ofstream file("leaderboard.txt", std::ios::app);
-    
-    // Controlla se il file è stato aperto con successo
-    if (file.is_open()) {
-        file << punteggioFinale << "\n"; // Scrive il numero e va a capo
-        file.close();                    // Chiude il flusso
-    }
+    const char* msg = "V I T T O R I A !";
+    const char* subMsg1 = "HAI COMPLETATO CON SUCCESSO TUTTI I 10 LIVELLI!";
+    const char* subMsg2 = "Premi un tasto per registrare il tuo punteggio...";
+
+    // Centra le scritte sulla finestra del terminale
+    mvprintw(yMax / 2 - 3, (xMax - strlen(msg)) / 2, "%s", msg);
+    mvprintw(yMax / 2 - 1, (xMax - strlen(subMsg1)) / 2, "%s", subMsg1);
+    mvprintw(yMax / 2 + 1, (xMax - 30) / 2, "PUNTEGGIO FINALE: %07d", p->getScore());
+    mvprintw(yMax / 2 + 3, (xMax - strlen(subMsg2)) / 2, "%s", subMsg2);
+
+    refresh();
+
+    // Attesa bloccante del giocatore
+    nodelay(stdscr, FALSE);
+    flushinp();
+    getch();
+    clear();
 }
 
-// Lettura e stampa della leaderboard dal file leaderboard.txt
+// Funzione per richiedere il nome del giocatore e salvare nome e punteggio su file
+void GameEngine::saveScore() {
+    int punteggioFinale = p->getScore();
+    if (punteggioFinale <= 0) return;
+
+    clear();
+    nodelay(stdscr, FALSE); // Rende l'input bloccante per attendere l'utente
+    echo();                 // Mostra a schermo i caratteri digitati
+    curs_set(1);            // Rende visibile il cursore
+
+    char nome[32] = "";
+    const char* subPrompt = "Inserisci il tuo nome (max 15 caratteri): ";
+    
+    mvprintw(yMax / 2 - 2, (xMax - 30) / 2, "PUNTEGGIO FINALE: %07d", punteggioFinale);
+    mvprintw(yMax / 2, (xMax - strlen(subPrompt)) / 2, "%s", subPrompt);
+    refresh();
+
+    // Legge al massimo 15 caratteri evitando buffer overflow
+    getnstr(nome, 15);
+
+    // Se il giocatore preme solo invio, assegniamo un nome predefinito
+    if (strlen(nome) == 0) {
+        strncpy(nome, "Giocatore", 31);
+    } else {
+        // Sostituisce eventuali spazi con '_' per non spezzare la lettura con operatore >>
+        for (int i = 0; nome[i] != '\0'; i++) {
+            if (nome[i] == ' ') nome[i] = '_';
+        }
+    }
+
+    noecho();    // Disattiva la visualizzazione automatica dei tasti
+    curs_set(0); // Nasconde nuovamente il cursore
+
+    std::ofstream file("leaderboard.txt", std::ios::app);
+    if (file.is_open()) {
+        file << nome << " " << punteggioFinale << "\n";
+        file.close();
+    }
+    clear();
+}
+
+// Struttura C pura per memorizzare un record senza usare std::string
+struct RecordClassifica {
+    char nome[32];
+    int score;
+};
+
+// Funzione per mostrare la classifica dei punteggi salvati
 void GameEngine::showLeaderboard() {
     clear();
-    
-    const char* titolo = "--- T O P   1 0   S C O R E S ---";
-    mvprintw(2, (xMax - strlen(titolo)) / 2, "%s", titolo);
+    nodelay(stdscr, FALSE);
     
     std::ifstream file("leaderboard.txt");
-    
-    int rigaY = 5;
-    
+    RecordClassifica scores[100];
+    int count = 0;
+
     if (file.is_open()) {
-        int scoreLetto;
-        int scores[100]; // Array per salvare fino a 100 punteggi
-        int count = 0;
-        
-        // 1. Leggiamo tutti i punteggi dal file e li mettiamo nell'array
-        while (file >> scoreLetto && count < 100) {
-            scores[count] = scoreLetto;
+        // Legge coppia (nome, punteggio) finché il file non termina o si riempie l'array
+        while (count < 100 && (file >> scores[count].nome >> scores[count].score)) {
             count++;
         }
         file.close();
-        
-        // 2. Ordiniamo l'array dal più grande al più piccolo (Bubble Sort)
+
+        // Ordinamento decrescente per punteggio (Bubble Sort)
         for (int i = 0; i < count - 1; i++) {
             for (int j = 0; j < count - i - 1; j++) {
-                if (scores[j] < scores[j + 1]) {
-                    // Scambio i valori
-                    int temp = scores[j];
+                if (scores[j].score < scores[j + 1].score) {
+                    RecordClassifica temp = scores[j];
                     scores[j] = scores[j + 1];
                     scores[j + 1] = temp;
                 }
             }
         }
-        
-        // 3. Stampiamo i risultati
-        if (count > 0) {
-            // Vogliamo stampare al massimo i primi 10 risultati
-            int maxDaStampare = (count < 10) ? count : 10;
-            
-            for (int i = 0; i < maxDaStampare; i++) {
-                // Formattiamo la stringa con la posizione (es. "1. PUNTEGGIO: 005500")
-                mvprintw(rigaY, (xMax - 20) / 2, "%d. PUNTEGGIO: %06d", i + 1, scores[i]);
-                rigaY++;
-            }
-        } else {
-            // Il file esiste ma è vuoto
-            const char* errore = "Nessun punteggio salvato!";
-            mvprintw(rigaY, (xMax - strlen(errore)) / 2, "%s", errore);
-        }
-        
-    } else {
-        // Il file non esiste ancora
-        const char* errore = "Nessun punteggio salvato!";
-        mvprintw(rigaY, (xMax - strlen(errore)) / 2, "%s", errore);
     }
-    
-    const char* subMsg = "Premi un tasto per tornare al Menu...";
-    mvprintw(rigaY + 3, (xMax - strlen(subMsg)) / 2, "%s", subMsg);
-    
+
+    if (count == 0) {
+        const char* errore = "Nessun punteggio salvato!";
+        mvprintw(yMax / 2, (xMax - strlen(errore)) / 2, "%s", errore);
+        const char* subMsg = "Premi un tasto per tornare al Menu...";
+        mvprintw(yMax / 2 + 2, (xMax - strlen(subMsg)) / 2, "%s", subMsg);
+        refresh();
+        flushinp();
+        getch();
+        clear();
+        return;
+    }
+
+    // Richiesta degli 'N' migliori giocatori come da requisiti di progetto
+    echo();
+    curs_set(1);
+    const char* richPrompt = "Quanti record vuoi visualizzare? (1-10): ";
+    mvprintw(yMax / 2 - 1, (xMax - strlen(richPrompt)) / 2, "%s", richPrompt);
     refresh();
-    
-    nodelay(stdscr, FALSE);
+
+    char bufferN[8] = "";
+    getnstr(bufferN, 7);
+    int nRichiesti = atoi(bufferN);
+    if (nRichiesti <= 0) nRichiesti = 5; // Valore di default se non valido
+    if (nRichiesti > count) nRichiesti = count;
+
+    noecho();
+    curs_set(0);
+    clear();
+
+    const char* titolo = "--- C L A S S I F I C A ---";
+    mvprintw(2, (xMax - strlen(titolo)) / 2, "%s", titolo);
+
+    int rigaY = 5;
+    for (int i = 0; i < nRichiesti; i++) {
+        mvprintw(rigaY, (xMax - 32) / 2, "%d. %-15s %06d", i + 1, scores[i].nome, scores[i].score);
+        rigaY++;
+    }
+
+    const char* subMsg = "Premi un tasto per tornare al Menu...";
+    mvprintw(rigaY + 2, (xMax - strlen(subMsg)) / 2, "%s", subMsg);
+
+    refresh();
     flushinp();
     getch();
-    
     clear();
 }
 
@@ -425,19 +484,32 @@ void GameEngine::run() {
 
                     int livelloCorrente = currentMap->GetLvlN();
                     
-                    // 1. SALVA I NEMICI DEL LIVELLO CORRENTE
-                    numNemiciPerLivello[livelloCorrente] = numeroNemici;
-                    for (int i = 0; i < numeroNemici; i++) {
-                        nemiciPerLivello[livelloCorrente][i] = arrayNemici[i];
-                    }
-
-                    // CHECK EXPLOIT: Bonus punti (il tuo codice originale)
+                    // CHECK EXPLOIT: Bonus punti sul tempo rimanente (senza 'auto')
                     if (livelloCorrente >= maxLevelReached) {
-                        auto now = std::chrono::steady_clock::now();
+                        std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
                         int tempoTrascorso = std::chrono::duration_cast<std::chrono::seconds>(now - startTime).count();
                         int tempoRimanente = 2000 - tempoTrascorso;
                         if (tempoRimanente > 0) p->addScore(tempoRimanente * 10); 
                         maxLevelReached = livelloCorrente + 1;
+                    }
+
+                    // ======================================================
+                    // CONDIZIONE DI VITTORIA: SUPERATO IL LIVELLO 10
+                    // ======================================================
+                    if (livelloCorrente >= 10) {
+                        p->erase(*currentMap);
+                        resetGameVariables();
+                        showVictoryScreen(); // Mostra il messaggio di vittoria
+                        saveScore();         // Chiede il nome e salva la partita vinta
+                        inGame = false;
+                        nodelay(stdscr, FALSE);
+                        continue;            // Torna direttamente al MainMenu
+                    }
+
+                    // 1. SALVA I NEMICI DEL LIVELLO CORRENTE
+                    numNemiciPerLivello[livelloCorrente] = numeroNemici;
+                    for (int i = 0; i < numeroNemici; i++) {
+                        nemiciPerLivello[livelloCorrente][i] = arrayNemici[i];
                     }
 
                     p->erase(*currentMap);

@@ -7,7 +7,7 @@ crea il file e la classe per settare la BFS
 Inserire un timer per il countdown dei powerups
 
 
-Fixa tutte queste paroline: static, const
+Fixa tutte queste paroline: static, const, continue, auto
 Osserva meglio come funziona la leaderboard
 
 

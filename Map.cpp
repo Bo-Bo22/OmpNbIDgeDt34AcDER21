@@ -134,7 +134,6 @@ void Map::initmap(int livelloReale) {
     }  
     
 
-
     // 8. NASCONDI I POWERUPS
     int numPowerups = 3; 
     
@@ -153,6 +152,8 @@ void Map::initmap(int livelloReale) {
             }
         }
     }
+
+    map[3][3] = 3;  
     
 
 }

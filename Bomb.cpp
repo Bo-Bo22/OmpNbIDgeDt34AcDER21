@@ -3,7 +3,7 @@
 
 bool Bomb::update(Map &Mappa, Player &Pl, Enemy** En, int n_nemici) {
 
-    auto now =  std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point now =  std::chrono::steady_clock::now();
     int blink_time = 500; // millisecondi
     int exploding_time = 2; // secondi
 
