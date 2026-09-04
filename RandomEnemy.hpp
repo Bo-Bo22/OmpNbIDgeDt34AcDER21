@@ -9,9 +9,7 @@
 // Sottoclasse RandomEnemy (Il nemico che si muove in modo casuale)
 class RandomEnemy : public Enemy {
 public:
-    RandomEnemy(int x, int y, char c, WINDOW *win, Direction dir, int cp) :
-        Enemy(x, y, c, win, dir, cp) {
-        }
+    RandomEnemy(int x, int y, char c, WINDOW *win, Direction dir, int moveInterval, int cp);
         
     void update(Map &Mappa, Player &pl);
 };

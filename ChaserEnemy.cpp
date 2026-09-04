@@ -10,7 +10,7 @@ ChaserEnemy::ChaserEnemy(int startX, int startY, char sym, WINDOW* win, Directio
     : Enemy(startX, startY, sym, win, dir, cp) {
     lastMove = std::chrono::steady_clock::now();
     
-    MoveInterval = 200; // Bilanciamento all'IA infallibile
+    MoveInterval = moveInterval; // Bilanciamento all'IA infallibile
 }
 
 // ============================================================================

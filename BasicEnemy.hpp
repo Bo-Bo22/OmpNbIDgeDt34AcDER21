@@ -9,9 +9,7 @@
 // Sottoclasse BasicEnemy (Il nemico standard)
 class BasicEnemy : public Enemy {
 public:
-    BasicEnemy(int x, int y, char c, WINDOW *win, Direction dir, int cp) :
-        Enemy(x, y, c, win, dir, cp) {}
-        
+    BasicEnemy(int x, int y, char c, WINDOW *win, Direction dir, int moveInterval, int cp);
     void update(Map &Mappa, Player &pl);
 };
 

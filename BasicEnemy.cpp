@@ -1,6 +1,12 @@
 #include "BasicEnemy.hpp"
 #include <cmath>
 
+BasicEnemy::BasicEnemy(int startX, int startY, char sym, WINDOW* win, Direction dir, int moveInterval, int cp)
+    : Enemy(startX, startY, sym, win, dir, cp) {
+    lastMove = std::chrono::steady_clock::now();
+    MoveInterval = moveInterval;
+}
+
 void BasicEnemy::update(Map &Mappa, Player &pl) {
     if (!isAlive()) {
         erase(Mappa);

@@ -9,9 +9,7 @@
 // Sottoclasse EasyChaserEnemy (L'inseguitore "stupido")
 class EasyChaserEnemy : public Enemy {
 public:
-    EasyChaserEnemy(int x, int y, char c, WINDOW *win, Direction dir, int cp) :
-        Enemy(x, y, c, win, dir, cp) {
-        }
+    EasyChaserEnemy(int x, int y, char c, WINDOW *win, Direction dir, int moveInterval, int cp);
         
     void update(Map &Mappa, Player &pl);
     bool MoveToPlayer(Map &Mappa, Player &pl); 
