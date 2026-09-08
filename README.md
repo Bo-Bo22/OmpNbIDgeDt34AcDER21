@@ -4,6 +4,15 @@ Versione arcade per terminale del classico videogioco **Bomberman**, sviluppata 
 
 ---
 
+## Informazioni Studente
+
+* **Autore:** Jacopo Bollati
+* **Matricola:** 0001212709
+* **Email:** jacopo.bollati@studio.unibo.it
+* **Ateneo:** Alma Mater Studiorum – Università di Bologna
+
+---
+
 ## Caratteristiche Principali
 
 * **Architettura Modulare a Oggetti**: incapsulamento rigoroso distribuito su classi dedicate (`Player`, `Map`, `Bomb`, `Enemy`, `GameEngine`, `LevelManager`, `UIManager`).
