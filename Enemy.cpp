@@ -1,4 +1,5 @@
 #include "Enemy.hpp"
+#include <cstdlib>
 
 // Costruttore base 
 Enemy::Enemy(int x, int y, char c, WINDOW *win, Direction dir, int cp) {
