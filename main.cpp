@@ -12,8 +12,8 @@ int main() {
     getmaxyx(stdscr, termY, termX);
 
     // Dimensioni minime necessarie per contenere mappa (20x40) e HUD
-    const int MIN_RIGHE = 24;
-    const int MIN_COLONNE = 50;
+    const int MIN_RIGHE = 28;
+    const int MIN_COLONNE = 60;
 
     if (termY < MIN_RIGHE || termX < MIN_COLONNE) {
     endwin();
