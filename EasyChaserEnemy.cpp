@@ -1,4 +1,5 @@
 #include "EasyChaserEnemy.hpp"
+#include <cstdlib>
 
 EasyChaserEnemy::EasyChaserEnemy(int startX, int startY, char sym, WINDOW* win, Direction dir, int moveInterval, int cp)
     : Enemy(startX, startY, sym, win, dir, cp) {
