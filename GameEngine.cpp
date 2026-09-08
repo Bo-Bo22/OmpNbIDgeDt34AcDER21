@@ -1,4 +1,5 @@
 #include "GameEngine.hpp"
+#include <cstdlib>
 
 // Costruttore
 GameEngine::GameEngine(int y, int x) {
