@@ -1,4 +1,5 @@
 #include "Map.hpp"
+#include <cstdlib>
 
 // Costruttore: crea una finestra per la mappa e la centra sullo schermo
 Map::Map(int yMax) {
