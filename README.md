@@ -1,6 +1,6 @@
 # Bomberman C++ (Terminal Edition)
 
-Versione arcade per terminale del classico videogioco **Bomberman**, sviluppata interamente in C++ con interfaccia a caratteri tramite la libreria **ncurses**. Il progetto adotta un'architettura rigorosamente orientata agli oggetti, realizzata sotto stringenti vincoli didattici: assenza di container della Standard Template Library (STL), divieto di array dinamici (`new T[]`) e gestione manuale delle strutture dati dinamiche.
+Versione arcade per terminale del classico videogioco **Bomberman**, sviluppata interamente in C++ con interfaccia a caratteri tramite la libreria **ncurses**. Il progetto adotta un'architettura rigorosamente orientata agli oggetti, realizzata sotto i seguenti vincoli didattici: assenza di container della Standard Template Library (STL), divieto di array dinamici (`new T[]`) e gestione manuale delle strutture dati dinamiche.
 
 ---
 
