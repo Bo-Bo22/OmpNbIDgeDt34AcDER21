@@ -43,9 +43,37 @@ Versione arcade per terminale del classico videogioco **Bomberman**, sviluppata 
 * **Libreria ncurses** installata sul sistema.
 * **Dimensioni Minime Terminale**: **50 colonne $\times$ 24 righe** (il gioco verifica le dimensioni all'avvio segnalando eventuali discrepanze).
 
-### Installazione delle Dipendenze
+## Installazione delle Dipendenze
 
 * **Ubuntu / Debian**:
   ```bash
   sudo apt-get update
   sudo apt-get install build-essential libncurses5-dev libncursesw6
+  ```
+* **macOS** (tramite Homebrew o SDK nativo):
+  ```bash
+  brew install ncurses
+  ```
+
+---
+
+## Compilazione ed Esecuzione
+
+Dalla cartella principale del progetto, esegui:
+
+```bash
+# Compilazione
+g++ -std=c++11 -Wall -Wextra *.cpp -lncurses -o bomber_game
+
+# Esecuzione
+./bomber_game
+```
+
+---
+
+## Vincoli Accademici e Standard Rispettati
+
+1. **Zero STL**: nessun utilizzo di `std::vector`, `std::list`, `std::queue` o `std::string`. I buffer e le stringhe sono gestiti come array C-style terminati da `\0` con funzioni della libreria `<cstring>`.
+2. **Nessun Array Dinamico**: rigida conformità alle specifiche di corso con esclusione dell'operatore `new T[]`. I dati matriciali usano dimensioni fisse statiche, mentre l'heap è riservato esclusivamente a nodi strutturati atomici.
+3. **Assenza di Membri Statici**: non sono presenti metodi o attributi `static` all'interno delle classi. La logica è interamente basata su istanze e costanti globali di compilazione.
+4. **Separazione Modulare**: i file header (`.hpp`) contengono esclusivamente dichiarazioni di tipo, costanti note e prototipi; le inizializzazioni dei dati sono confinate nei corpi dei costruttori nei file `.cpp`.
