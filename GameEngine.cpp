@@ -22,7 +22,7 @@ GameEngine::GameEngine(int y, int x) {
     for (int i = 0; i < 11; i++) {
         livelloVisitato[i] = false;
         numNemiciPerLivello[i] = 0;
-        for (int j = 0; j < 30; j++) {
+        for (int j = 0; j < 10; j++) {
             nemiciPerLivello[i][j] = NULL;
         }
     }
@@ -487,7 +487,7 @@ void GameEngine::run() {
                 p->resetStats();
                 
                 // Reset della cronologia delle stanze visitate
-                for (int i = 0; i < 50; i++) {
+                for (int i = 0; i < 11; i++) {
                     livelloVisitato[i] = false;
                 }
                 
