@@ -4,12 +4,9 @@
 using namespace std; //per non usare std:: prima delle funzioni della libreria cstring
 
 Button::Button(WINDOW* win, int y, int x, int y_str, int x_str, int width, const char* label) {
-    this->win = win;
     btnWin = newwin(3, width, y, x);
     this->y = y;
     this->x = x;
-    this->y_str = y_str;
-    this->x_str = x_str;
     this->width = width;
     
     // Copia al massimo 31 caratteri per non sforare l'array da 32

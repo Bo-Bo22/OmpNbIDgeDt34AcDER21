@@ -18,8 +18,8 @@ Enemy::Enemy(int x, int y, char c, WINDOW *win, Direction dir, int cp) {
 //Genera un nemico in un punto casuale della mappa
 void Enemy::spawna_casuale(Map &Mappa, Enemy** altri, int n) {
     bool occupato = false;
-    int h = Map::getHeight(); // Recupera l'altezza massima della mappa
-    int w = Map::getWidth();  // Recupera la larghezza massima della mappa
+    int h = Mappa.getHeight(); // Recupera l'altezza massima della mappa
+    int w = Mappa.getWidth();  // Recupera la larghezza massima della mappa
     
     // Estrazione casuale di una coordinata libera da ostacoli
     do {
@@ -65,14 +65,16 @@ void Enemy::spawna_casuale(Map &Mappa, Enemy** altri, int n) {
     }
 }
 
+// Calcola e applica lo spostamento nella direzione corrente; in presenza di muri,
+// bordi o safe zone, esegue l'inversione di marcia (meccanica di rimbalzo).
 bool Enemy::MoveInCurrDirection(Map &Mappa) {
     // Variabili per calcolare in anticipo le coordinate del passo successivo
     int nextY = YLoc;
     int nextX = XLoc;
     
     // Recupera le dimensioni calpestabili della mappa dalle costanti globali
-    int h = Map::getHeight();
-    int w = Map::getWidth();
+    int h = Mappa.getHeight();
+    int w = Mappa.getWidth();
     
     // Calcolo di nextY in base alla direzione attuale
     if (Dir == Direction::DOWN) {
@@ -128,14 +130,14 @@ void Enemy::erase(Map &Mappa) {
     Mappa.renderPos(YLoc, XLoc);
 }
 
-//Disegna l'icona del nemico
+// Renderizza il simbolo identificativo del nemico sul buffer video con il relativo colore.
 void Enemy::display() {
     wattron(curwin, colorPair);
     mvwaddch(curwin, YLoc, XLoc, character);
     wattroff(curwin, colorPair);
 }
 
-//Imposta lo stato alive a false
+// Segnala l'eliminazione dell'entita' nemica e ripulisce graficamente la sua scacchiera.
 void Enemy::kill(Map &Mappa) {
     alive = false;
     erase(Mappa);

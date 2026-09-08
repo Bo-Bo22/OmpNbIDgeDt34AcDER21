@@ -19,9 +19,9 @@ protected:
 
     bool hitByExplosion;
 
-    int maxBombs = 1;      // Numero massimo di bombe piazzabili
-    int bombRange = 1;     // Lunghezza dell'esplosione
-    bool wallPass = false; // Permette di attraversare i muri distruttibili
+    int maxBombs;
+    int bombRange;
+    bool wallPass;
 
 public:
     Player(WINDOW* win, int y, int x, char c);
@@ -32,12 +32,10 @@ public:
     void mvright(Map &Mappa);
     int getmv(Map &Mappa);
     void display();
-    void movement(WINDOW * win, Map &Mappa);
     
     int getX();
     int getY();
     int getLife();
-    int LifeUp();
     
 
     int Death(bool lampeggiante);

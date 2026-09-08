@@ -18,9 +18,6 @@ typedef lista_cmd* plista_cmd;
 class MainMenu{
 
 protected:
-    MenuPage currentPage;
-    int selectedOption;
-    int selectedLevel;
     
     Button play;
     Button ldrBoard;   
@@ -28,15 +25,10 @@ protected:
     plista_cmd n1; 
     plista_cmd n2; 
     plista_cmd n3; 
-    plista_cmd n4;
     plista_cmd curr; 
     
     //LevelManager& lm;
     void drawMain(int MaxY, int MaxX);
-    void drawLevelList();
-    void drawLeaderboard();
-    void drawLevelPreview(int Livello, int winY, int WinX);
-
     
 
 public:

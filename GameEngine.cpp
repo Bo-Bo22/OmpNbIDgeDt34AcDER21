@@ -12,15 +12,24 @@ GameEngine::GameEngine(int y, int x) {
     p = new Player(stdscr, 1, 1, '@');
     
     // Assicuriamoci che ogni singolo slot degli array sia NULL all'avvio
-    for (int i = 0; i < MAX_BOMBE; i++) {
+    for (int i = 0; i < 6; i++) {
         bombeAttive[i] = NULL;
     }
-    for (int i = 0; i < MAX_NEMICI; i++) {
+    for (int i = 0; i < 10; i++) {
         arrayNemici[i] = NULL; 
     }
 
+    for (int i = 0; i < 11; i++) {
+        livelloVisitato[i] = false;
+        numNemiciPerLivello[i] = 0;
+        for (int j = 0; j < 30; j++) {
+            nemiciPerLivello[i][j] = NULL;
+        }
+    }
+
+
     timerRunning = false;
-    int maxLevelReached = 1;
+    maxLevelReached = 1;
 }
 
 // Funzione per ottenere il numero di nemici attivi
@@ -35,8 +44,8 @@ void GameEngine::setupGameScreen() {
     refresh();
     
     p->setWindow(currentMap->getWin());
-    UIManager::getCenterCoordinates(Map::getWidth(), Map::getHeight(), startY, startX);
-    UIManager::drawBorder(Map::getWidth(), Map::getHeight(), startY, startX);
+    ui.getCenterCoordinates(currentMap->getWidth(), currentMap->getHeight(), startY, startX);
+    ui.drawBorder(currentMap->getWidth(), currentMap->getHeight(), startY, startX);
     
     // Ripulisce la grafica da scie di E e *
     currentMap->renderLevel(); 
@@ -63,17 +72,17 @@ void GameEngine::handleBombPlacement(int tasto) {
         // Se siamo qui, significa che il giocatore è su un terreno valido.
         // Procediamo col normale conteggio e piazzamento.
         int bombePiazzate = 0;
-        for (int i = 0; i < MAX_BOMBE; i++) {
+        for (int i = 0; i < 6; i++) {
             if (bombeAttive[i] != NULL) {
                 bombePiazzate++;
             }
         }
         
         if (bombePiazzate < p->getMaxBombs()) {
-            for (int i = 0; i < MAX_BOMBE; i++) {
+            for (int i = 0; i < 6; i++) {
                 if (bombeAttive[i] == NULL) {
                     // Crea la bomba con il raggio potenziato
-                    bombeAttive[i] = new Bomb(p->getX(), p->getY(), currentMap->getWin(), p->getBombRange(), false);
+                    bombeAttive[i] = new Bomb(p->getX(), p->getY(), currentMap->getWin(), p->getBombRange());
                     break;
                 }
             }
@@ -83,7 +92,7 @@ void GameEngine::handleBombPlacement(int tasto) {
 
 // Aggiornamento logico e grafico delle bombe
 void GameEngine::updateAndDrawBombs() {
-    for (int i = 0; i < MAX_BOMBE; i++) {
+    for (int i = 0; i < 6; i++) {
         if (bombeAttive[i] != NULL) {
             bool hit = bombeAttive[i]->update(*currentMap, *p, arrayNemici, numeroNemici);
             
@@ -100,7 +109,7 @@ void GameEngine::updateAndDrawBombs() {
 // Gestione procedurale della generazione dei nemici
 void GameEngine::generateEnemies() {
     // 1. PULIZIA TOTALE SICURA: Cicliamo su TUTTA la capienza dell'array
-    for (int i = 0; i < MAX_NEMICI; i++) {
+    for (int i = 0; i < 10; i++) {
         if (arrayNemici[i] != NULL) {
             delete arrayNemici[i];
             arrayNemici[i] = NULL;
@@ -109,8 +118,8 @@ void GameEngine::generateEnemies() {
     
     // 2. CALCOLO NUMERO NEMICI
     numeroNemici = 3 + ((currentMap->GetLvlN()) / 2);
-    if (numeroNemici > MAX_NEMICI) {
-        numeroNemici = MAX_NEMICI;
+    if (numeroNemici > 10) {
+        numeroNemici = 10; // Limite massimo di nemici
     }
     
     // 3. GENERAZIONE
@@ -121,11 +130,11 @@ void GameEngine::generateEnemies() {
         if (i % 4 == 0) {
             nuovoNemico = new BasicEnemy(0, 0, 'B', currentMap->getWin(), Direction::RIGHT, 250, 7); 
         } else if (i % 4 == 1) {
-            nuovoNemico = new EasyChaserEnemy(0, 0, 'E', currentMap->getWin(), Direction::DOWN, 300, 7); 
+            nuovoNemico = new EasyChaserEnemy(0, 0, 'E', currentMap->getWin(), Direction::DOWN, 350, 7); 
         } else if (i % 4 == 2) {
-            nuovoNemico = new ChaserEnemy(0, 0, 'C', currentMap->getWin(), Direction::RIGHT, 300, 7);
+            nuovoNemico = new ChaserEnemy(0, 0, 'C', currentMap->getWin(), Direction::RIGHT, 350, 7);
         } else {
-            nuovoNemico = new RandomEnemy(0, 0, 'R', currentMap->getWin(), Direction::LEFT, 250, 7);
+            nuovoNemico = new RandomEnemy(0, 0, 'R', currentMap->getWin(), Direction::LEFT, 300, 7);
         }
         
         // Ora la chiamata è sicura al 100%
@@ -137,7 +146,7 @@ void GameEngine::generateEnemies() {
 // Stampa le statistiche sopra la finestra di gioco
 void GameEngine::drawHUD() {
     int startY, startX;
-    UIManager::getCenterCoordinates(Map::getWidth(), Map::getHeight(), startY, startX);
+    ui.getCenterCoordinates(currentMap->getWidth(), currentMap->getHeight(), startY, startX);
     
     // Ci posizioniamo 2 righe sopra la mappa
     int hudY = startY - 2;
@@ -154,7 +163,7 @@ void GameEngine::drawHUD() {
              
 
     // 2. HUD INFERIORE (tempo)
-    int bottomY = startY + Map::getHeight() + 1; 
+    int bottomY = startY + currentMap->getHeight() + 1; 
     
     move(bottomY, 0);
     clrtoeol(); 
@@ -175,7 +184,7 @@ void GameEngine::drawHUD() {
         }
     }
     
-    int timeX = startX + (Map::getWidth() / 2) - 5;
+    int timeX = startX + (currentMap->getWidth() / 2) - 5;
     
     mvprintw(bottomY, timeX, " TIME: %d ", tempoRimanente);
     
@@ -205,7 +214,8 @@ bool GameEngine::checkBombCollisions() {
     return false;
 }
 
-// Funzione per gestire la collisione con gli oggetti nascosti ($)
+// Verifica se la posizione del giocatore coincide con quella di un oggetto speciale (ID 5),
+// ne applica casualmente l'effetto e avvia l'animazione grafica di raccolta.
 void GameEngine::checkItemCollisions() {
     int pY = p->getY();
     int pX = p->getX();
@@ -244,7 +254,7 @@ void GameEngine::checkItemCollisions() {
 // Pulisce le variabili prima di un cambio livello
 void GameEngine::resetGameVariables() {
     // Distrugge tutte le bombe in corso per evitare che esplodano nella memoria
-    for (int i = 0; i < MAX_BOMBE; i++) {
+    for (int i = 0; i < 6; i++) {
         if (bombeAttive[i] != NULL) {
             delete bombeAttive[i];
             bombeAttive[i] = NULL;
@@ -303,39 +313,50 @@ void GameEngine::showVictoryScreen() {
     clear();
 }
 
-// Funzione per richiedere il nome del giocatore e salvare nome e punteggio su file
+// Richiede il nome all'utente in modo sicuro, normalizza gli spazi e salva
+// la coppia nome-punteggio in modalita' append (std::ios::app) sul file leaderboard.txt.
 void GameEngine::saveScore() {
     int punteggioFinale = p->getScore();
+    // Non registra punteggi nulli o negativi
     if (punteggioFinale <= 0) return;
 
     clear();
-    nodelay(stdscr, FALSE); // Rende l'input bloccante per attendere l'utente
-    echo();                 // Mostra a schermo i caratteri digitati
-    curs_set(1);            // Rende visibile il cursore
+    // Disattiva la modalita' non-bloccante: l'I/O deve attendere la digitazione dell'utente
+    nodelay(stdscr, FALSE);
+    // Abilita l'eco a video dei caratteri digitati e rende visibile il cursore
+    echo();
+    curs_set(1);
 
-    char nome[32] = "";
+    // Buffer: 15 caratteri alfanumerici massimi + 1 cella riservata al terminatore '\0'
+    char nome[16] = "";
     const char* subPrompt = "Inserisci il tuo nome (max 15 caratteri): ";
     
+    // Centratura dei messaggi a video tramite le dimensioni del terminale
     mvprintw(yMax / 2 - 2, (xMax - 30) / 2, "PUNTEGGIO FINALE: %07d", punteggioFinale);
     mvprintw(yMax / 2, (xMax - strlen(subPrompt)) / 2, "%s", subPrompt);
     refresh();
 
-    // Legge al massimo 15 caratteri evitando buffer overflow
+    // getnstr() tronca la lettura a 15 caratteri evitando scritture fuori dai limiti dello stack
     getnstr(nome, 15);
 
-    // Se il giocatore preme solo invio, assegniamo un nome predefinito
+    // Fallback: se l'utente preme invio a vuoto, assegna una stringa di default
     if (strlen(nome) == 0) {
-        strncpy(nome, "Giocatore", 31);
+        strncpy(nome, "Giocatore", 15);
+        nome[15] = '\0'; // Garanzia esplicita di terminazione corretta
     } else {
-        // Sostituisce eventuali spazi con '_' per non spezzare la lettura con operatore >>
+        // Sanitizzazione: converte gli spazi in '_' per non spezzare il parsing sequenziale con '>>'
         for (int i = 0; nome[i] != '\0'; i++) {
-            if (nome[i] == ' ') nome[i] = '_';
+            if (nome[i] == ' ') {
+                nome[i] = '_';
+            }
         }
     }
 
-    noecho();    // Disattiva la visualizzazione automatica dei tasti
-    curs_set(0); // Nasconde nuovamente il cursore
+    // Ripristina l'input nascosto e disattiva il cursore grafico
+    noecho();
+    curs_set(0);
 
+    // Scrittura in modalita' append (std::ios::app) per aggiungere il record in coda senza sovrascritture
     std::ofstream file("leaderboard.txt", std::ios::app);
     if (file.is_open()) {
         file << nome << " " << punteggioFinale << "\n";
@@ -344,32 +365,35 @@ void GameEngine::saveScore() {
     clear();
 }
 
-// Struttura C pura per memorizzare un record senza usare std::string
+// Struttura C pura per incapsulare ciascun record senza ricorrere a std::string
 struct RecordClassifica {
-    char nome[32];
-    int score;
+    char nome[16]; // Buffer allineato esattamente a 15 caratteri utili + '\0'
+    int score;     // Punteggio numerico associato
 };
 
-// Funzione per mostrare la classifica dei punteggi salvati
+// Acquisisce i record persistenti da file, ordina i punteggi in memoria tramite
+// algoritmo di Bubble Sort decrescente e stampa a video la classifica formattata.
 void GameEngine::showLeaderboard() {
     clear();
+    // Modalita' bloccante per la selezione dei record e la schermata di attesa
     nodelay(stdscr, FALSE);
     
     std::ifstream file("leaderboard.txt");
-    RecordClassifica scores[100];
+    RecordClassifica scores[100]; // Array limitato a un massimo di 100 salvataggi
     int count = 0;
 
     if (file.is_open()) {
-        // Legge coppia (nome, punteggio) finché il file non termina o si riempie l'array
+        // Lettura formattata a token: estrae la coppia nome-punteggio separata da spazio
         while (count < 100 && (file >> scores[count].nome >> scores[count].score)) {
             count++;
         }
         file.close();
 
-        // Ordinamento decrescente per punteggio (Bubble Sort)
+        // Ordinamento decrescente in memoria tramite Bubble Sort
         for (int i = 0; i < count - 1; i++) {
             for (int j = 0; j < count - i - 1; j++) {
                 if (scores[j].score < scores[j + 1].score) {
+                    // Scambio per valore dei due record adiacenti
                     RecordClassifica temp = scores[j];
                     scores[j] = scores[j + 1];
                     scores[j + 1] = temp;
@@ -378,6 +402,7 @@ void GameEngine::showLeaderboard() {
         }
     }
 
+    // Gestione del file assente o privo di punteggi registrati
     if (count == 0) {
         const char* errore = "Nessun punteggio salvato!";
         mvprintw(yMax / 2, (xMax - strlen(errore)) / 2, "%s", errore);
@@ -390,7 +415,7 @@ void GameEngine::showLeaderboard() {
         return;
     }
 
-    // Richiesta degli 'N' migliori giocatori come da requisiti di progetto
+    // Acquisizione parametrica del numero di record desiderati dall'utente
     echo();
     curs_set(1);
     const char* richPrompt = "Quanti record vuoi visualizzare? (1-10): ";
@@ -398,9 +423,11 @@ void GameEngine::showLeaderboard() {
     refresh();
 
     char bufferN[8] = "";
-    getnstr(bufferN, 7);
+    getnstr(bufferN, 7); // Lettura sicura del valore numerico sotto forma di stringa
     int nRichiesti = atoi(bufferN);
-    if (nRichiesti <= 0) nRichiesti = 5; // Valore di default se non valido
+
+    // Validazione: fallback a 5 elementi se il dato e' errato, clamp al numero di record reali
+    if (nRichiesti <= 0) nRichiesti = 5;
     if (nRichiesti > count) nRichiesti = count;
 
     noecho();
@@ -412,6 +439,14 @@ void GameEngine::showLeaderboard() {
 
     int rigaY = 5;
     for (int i = 0; i < nRichiesti; i++) {
+        // Ripristino visivo: riconverte i caratteri '_' in spazi per la visualizzazione all'utente
+        for (int c = 0; scores[i].nome[c] != '\0'; c++) {
+            if (scores[i].nome[c] == '_') {
+                scores[i].nome[c] = ' ';
+            }
+        }
+
+        // Stampa tabellare: posizione numerica, nome allineato a sinistra su 15 colonne e score a 6 cifre
         mvprintw(rigaY, (xMax - 32) / 2, "%d. %-15s %06d", i + 1, scores[i].nome, scores[i].score);
         rigaY++;
     }
@@ -420,6 +455,7 @@ void GameEngine::showLeaderboard() {
     mvprintw(rigaY + 2, (xMax - strlen(subMsg)) / 2, "%s", subMsg);
 
     refresh();
+    // Svuota i tasti residui dal buffer prima del rientro al menu
     flushinp();
     getch();
     clear();
@@ -434,57 +470,69 @@ Enemy* GameEngine::getNemico(int indice) {
 }
 
 
-// Il Game Loop Principale
+// ============================================================================
+// CICLO PRINCIPALE DI GIOCO (GAME LOOP)
+// ============================================================================
 void GameEngine::run() {
     while (true) {
+        // GESTIONE DELLO STATO FUORI DALLA PARTITA (MENU PRINCIPALE)
         if (!inGame) {
+            // Visualizza il menu interattivo e gestisce la selezione dell'utente
             MainMenu menu(yMax, xMax);
             int menuChoice = menu.run(yMax, xMax);
             
-            if (menuChoice == 1) { // L'utente sceglie GIOCA
-                maxLevelReached = 1; //resetta il record del livello massimo raggiunto
-                p->resetStats(); //resetta le vite e lo score del giocatore
-                // === RESET PROGRESSIONE LIVELLI ===
+            if (menuChoice == 1) { 
+                // Avvio di una nuova partita: reset completo di statistiche e punteggi
+                maxLevelReached = 1;
+                p->resetStats();
+                
+                // Reset della cronologia delle stanze visitate
                 for (int i = 0; i < 50; i++) {
                     livelloVisitato[i] = false;
                 }
+                
+                // Creazione del primo livello nella lista dinamica
                 currentMap = &manager.AddLevel(1, yMax);
                 p->resetPosition();
                 p->resetLevelFlags();
                 setupGameScreen();
                 generateEnemies();
-                // Segniamo il primo livello come visitato
+                
                 livelloVisitato[1] = true;
                 inGame = true;
-                // AVVIO DEL TIMER
                 startTime = std::chrono::steady_clock::now();
                 timerRunning = true;
-                nodelay(stdscr, TRUE); // Imposta la modalità non bloccante per l'input
-            } else if (menuChoice == 2) { // L'utente sceglie CLASSIFICA
+                
+                // Modalita' non-bloccante: la getch non arresta l'avanzamento dei frame
+                nodelay(stdscr, TRUE); 
+            } else if (menuChoice == 2) { 
+                // Consultazione della classifica persistente salvata su file
                 showLeaderboard();
             } else {
-                break; // Esce dal gioco
+                // Selezione "ESCI" o tasto di uscita: arresto definitivo del ciclo
+                break; 
             }
         } else {
-            // Logica in-game
+            // ========================================================================
+            // FASE 1: ACQUISIZIONE INPUT E AZIONI ATOMICHE
+            // ========================================================================
+            // Lettura asincrona della direzione di movimento o comandi speciali
             int tasto = p->getmv(*currentMap);
             handleBombPlacement(tasto);
             
+            // Gestione dell'interruzione anticipata con rientro al menu
             if (p->getReturnToMenu()) {
                 p->erase(*currentMap);
                 inGame = false;
-                resetGameVariables(); // Pulisce le vecchie bombe
-            }
-            else {
-            
-                // ==========================================================
-                // CAMBIO LIVELLO IN AVANTI
-                // ==========================================================
+                resetGameVariables();
+            } else {
+                // ====================================================================
+                // FASE 2: TRANSIZIONE AL LIVELLO SUCCESSIVO
+                // ====================================================================
                 if (p->ReturnNextLevel()) {
-
                     int livelloCorrente = currentMap->GetLvlN();
                     
-                    // CHECK EXPLOIT: Bonus punti sul tempo rimanente (senza 'auto')
+                    // Assegnazione del bonus tempo solo al primo completamento del livello
                     if (livelloCorrente >= maxLevelReached) {
                         std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
                         int tempoTrascorso = std::chrono::duration_cast<std::chrono::seconds>(now - startTime).count();
@@ -493,59 +541,56 @@ void GameEngine::run() {
                         maxLevelReached = livelloCorrente + 1;
                     }
 
-                    // ======================================================
-                    // CONDIZIONE DI VITTORIA: SUPERATO IL LIVELLO 10
-                    // ======================================================
+                    // Condizione di vittoria: completamento del decimo livello
                     if (livelloCorrente >= 10) {
                         p->erase(*currentMap);
                         resetGameVariables();
-                        showVictoryScreen(); // Mostra il messaggio di vittoria
-                        saveScore();         // Chiede il nome e salva la partita vinta
+                        showVictoryScreen();
+                        saveScore();
                         inGame = false;
                         nodelay(stdscr, FALSE);
-                        continue;            // Torna direttamente al MainMenu
                     }
 
-                    // 1. SALVA I NEMICI DEL LIVELLO CORRENTE
-                    numNemiciPerLivello[livelloCorrente] = numeroNemici;
-                    for (int i = 0; i < numeroNemici; i++) {
-                        nemiciPerLivello[livelloCorrente][i] = arrayNemici[i];
-                    }
+                    else{
 
-                    p->erase(*currentMap);
-                    resetGameVariables(); 
-                    currentMap = &manager.nextLevel(yMax);
-                    p->resetPosition();
-                    p->resetLevelFlags();
-                    p->resetPowerups(); // Resetta i potenziamenti del giocatore quando passa al livello successivo, prevenendo accumuli di bonus
-                    setupGameScreen();    
-                    
-                    // 2. CARICA O GENERA NEMICI PER LA NUOVA MAPPA
-                    int nuovoLvl = currentMap->GetLvlN();
-                    if (livelloVisitato[nuovoLvl]) {
-                        // Ci siamo già stati: ripristina la situazione salvata
-                        numeroNemici = numNemiciPerLivello[nuovoLvl];
+                        // Salvataggio dello stato dei nemici per la persistenza della stanza
+                        numNemiciPerLivello[livelloCorrente] = numeroNemici;
                         for (int i = 0; i < numeroNemici; i++) {
-                            arrayNemici[i] = nemiciPerLivello[nuovoLvl][i];
+                            nemiciPerLivello[livelloCorrente][i] = arrayNemici[i];
                         }
-                    } else {
-                        // Stanza inesplorata: genera nuovi mostri
-                        generateEnemies();
-                        livelloVisitato[nuovoLvl] = true;
+
+                        p->erase(*currentMap);
+                        resetGameVariables(); 
+                        // Avanzamento al nodo successivo della lista bidirezionale dei livelli
+                        currentMap = &manager.nextLevel(yMax);
+                        p->resetPosition();
+                        p->resetLevelFlags();
+                        p->resetPowerups();
+                        setupGameScreen();    
+                        
+                        // Ripristino nemici se la stanza e' gia' stata esplorata, altrimenti generazione
+                        int nuovoLvl = currentMap->GetLvlN();
+                        if (livelloVisitato[nuovoLvl]) {
+                            numeroNemici = numNemiciPerLivello[nuovoLvl];
+                            for (int i = 0; i < numeroNemici; i++) {
+                                arrayNemici[i] = nemiciPerLivello[nuovoLvl][i];
+                            }
+                        } else {
+                            generateEnemies();
+                            livelloVisitato[nuovoLvl] = true;
+                        }
+                        
+                        startTime = std::chrono::steady_clock::now();
                     }
-                    
-                    // RESET TIMER
-                    startTime = std::chrono::steady_clock::now();
                 }
                 
-                // ==========================================================
-                // RITORNO AL LIVELLO PRECEDENTE
-                // ==========================================================
+                // ====================================================================
+                // FASE 3: RITORNO AL LIVELLO PRECEDENTE (BACKTRACKING)
+                // ====================================================================
                 if (p->ReturnPrevLevel()) {
-                    
                     int livelloCorrente = currentMap->GetLvlN();
                     
-                    // 1. SALVA I NEMICI DEL LIVELLO CORRENTE
+                    // Salvataggio dei nemici residui della stanza che si sta abbandonando
                     numNemiciPerLivello[livelloCorrente] = numeroNemici;
                     for (int i = 0; i < numeroNemici; i++) {
                         nemiciPerLivello[livelloCorrente][i] = arrayNemici[i];
@@ -553,13 +598,14 @@ void GameEngine::run() {
 
                     p->erase(*currentMap);
                     resetGameVariables(); 
+                    // Retrocessione nella lista concatenata dei livelli
                     currentMap = &manager.prevLevel();
                     p->resetPosition();
                     p->resetLevelFlags();
-                    p->resetPowerups(); // Resetta i potenziamenti del giocatore quando torna indietro di livello
+                    p->resetPowerups();
                     setupGameScreen();    
                     
-                    // 2. RIPRISTINA I NEMICI DEL LIVELLO PRECEDENTE
+                    // Ripristino fedele dello stato della stanza precedente
                     int vecchioLvl = currentMap->GetLvlN();
                     if (livelloVisitato[vecchioLvl]) {
                         numeroNemici = numNemiciPerLivello[vecchioLvl];
@@ -569,38 +615,32 @@ void GameEngine::run() {
                     }
                 }
                 
-                // Rendering HUD e Mappa
+                // ====================================================================
+                // FASE 4: RENDERING SCENARIO E GIOCATORE
+                // ====================================================================
                 drawHUD();
                 currentMap->refresh();
-                p->display();
 
-                // 1. Disegna il giocatore solo se NON è appena stato investito dall'esplosione,
-                // evitando di cancellare la scia di fuoco '*'
+                // Disegno condizionato: previene glitch grafici se il player e' colpito
                 if (!p->getHitByExplosion()) {
                     p->display();
                 }
                 
-                // Aggiorna e disegna tutti i nemici in vita
+                // ====================================================================
+                // FASE 5: AGGIORNAMENTO LOGICO E RENDERING DEI NEMICI
+                // ====================================================================
                 for (int i = 0; i < numeroNemici; i++) {
                     if (arrayNemici[i] != NULL && arrayNemici[i]->isAlive()) {
-
-
                         char sym = arrayNemici[i]->getSymbol();
 
+                        // Polimorfismo esplicito basato sul simbolo dell'entita'
                         if (sym == 'C') {
-                            // Chaser Enemy (Inseguitore con BFS)
                             ((ChaserEnemy*)arrayNemici[i])->update(*currentMap, *p);
-                        } 
-                        else if (sym == 'R') {
-                            // Random Enemy (Movimento casuale)
+                        } else if (sym == 'R') {
                             ((RandomEnemy*)arrayNemici[i])->update(*currentMap, *p);
-                        } 
-                        else if (sym == 'E') {
-                            // Easy Chaser Enemy (Inseguitore Greedy)
+                        } else if (sym == 'E') {
                             ((EasyChaserEnemy*)arrayNemici[i])->update(*currentMap, *p);
-                        } 
-                        else if (sym == 'B') {
-                            // Basic Enemy (Movimento lineare)
+                        } else if (sym == 'B') {
                             ((BasicEnemy*)arrayNemici[i])->update(*currentMap, *p);
                         }
 
@@ -608,26 +648,24 @@ void GameEngine::run() {
                     }
                 }
 
-                // Controlla se il giocatore ha raccolto un oggetto nascosto
+                // Controllo e raccolta di power-up nascosti sotto i muri distrutti
                 checkItemCollisions();
                 
-                // --- CONTROLLO COLLISIONI PULITO ---
-                bool colpoDaBomba = p->getHitByExplosion(); // Salviamo la causa della morte
+                // ====================================================================
+                // FASE 6: RISOLUZIONE DELLE COLLISIONI E MORTE DEL PLAYER
+                // ====================================================================
+                bool colpoDaBomba = p->getHitByExplosion();
                 bool isHit = checkEnemyCollisions() || checkBombCollisions();
 
                 if (isHit) {
-
                     int morteY = p->getY();
                     int morteX = p->getX();
 
-                    // 2. Pulizia immediata della casella di morte prima del respawn
+                    // Disegna l'effetto visivo del colpo subito (fiamma o nemico)
                     if (colpoDaBomba) {
-                        // Sovrascrive il giocatore con la fiammata della bomba
                         mvwaddch(currentMap->getWin(), morteY, morteX, '*');
                         wrefresh(currentMap->getWin());
                     } else {
-                        // Morte da nemico: RIDISEGNA i nemici invece di fare erase!
-                        // Il nemico sovrascrive il '@' del player e rimane visibile a schermo
                         for (int i = 0; i < numeroNemici; i++) {
                             if (arrayNemici[i] != NULL && arrayNemici[i]->isAlive()) {
                                 arrayNemici[i]->display();
@@ -636,21 +674,20 @@ void GameEngine::run() {
                         wrefresh(currentMap->getWin());
                     }
 
-                    // Il giocatore è stato colpito da un nemico o da un'esplosione, non si fa l'erase della cella precedente per evitare glitch grafici
+                    // Esegue l'animazione di morte temporizzata e decrementa le vite
                     p->Death(true); 
 
                     if (p->getLife() <= 0) {
-                        // GAME OVER DEFINITIVO
                         saveScore(); 
                         inGame = false;
                         nodelay(stdscr, FALSE); 
                         showGameOverScreen();
                     } else {
-                        // RESPAWN CON VITE RIMANENTI
+                        // Ripristino del giocatore all'angolo di spawn con reset dei bonus
                         p->resetPosition();
+                        p->resetPowerups();
                         setupGameScreen();
 
-                        // Ridisegna subito i nemici dopo la pulizia dello schermo
                         for (int i = 0; i < numeroNemici; i++) {
                             if (arrayNemici[i] != NULL && arrayNemici[i]->isAlive()) {
                                 arrayNemici[i]->display();
@@ -660,66 +697,39 @@ void GameEngine::run() {
                     }
                     
                     resetGameVariables(); 
+                    // Bonifica del buffer di input: scarta comandi premuti durante l'animazione
+                    flushinp(); 
+                } else {
+                    // ================================================================
+                    // FASE 7: CADENZA FRAME-RATE E APERTURA PORTA DI LIVELLO
+                    // ================================================================
+                    updateAndDrawBombs();
+                    wrefresh(currentMap->getWin());
+                    
+                    // Frame pacing: pausa calibrata a circa 60 FPS
+                    napms(16); 
 
-                    // Pulisce eventuali input residui nel buffer per evitare che il tasto premuto in precedenza venga catturato
-                    flushinp();
-                }
-                else{
+                    // Verifica se tutti i nemici presenti sono stati eliminati
+                    bool tuttiMorti = true;
+                    for (int i = 0; i < getNumeroNemici(); i++) {
+                        Enemy* nemicoAttuale = getNemico(i);
+                        if (nemicoAttuale != NULL && nemicoAttuale->isAlive()) {
+                            tuttiMorti = false;
+                            break; 
+                        }
+                    }
 
-                updateAndDrawBombs();
-                wrefresh(currentMap->getWin());
-                napms(16); // Rallenta il loop per mantenere circa 60 FPS
-            
-                // ==========================================================
-                // CHECK PROGRESSIONE: NEMICI MORTI E PORTA SEGRETA
-                // ==========================================================
-
-                bool tuttiMorti = false;
-
-                // 1. Usa il getter per il numero dei nemici
-                for (int i = 0; i < getNumeroNemici(); i++) {
-                    Enemy* nemicoAttuale = getNemico(i);
-                    if (nemicoAttuale != NULL && !nemicoAttuale->isAlive()) {
-                        tuttiMorti = true; // C'è ancora qualcuno da sconfiggere!
-                        break; 
+                    // Sblocco della porta del livello: compare solo se il corridoio e' libero
+                    int pY = currentMap->getPortaY();
+                    int pX = currentMap->getPortaX();
+                    if (tuttiMorti && currentMap->GetPos(pY, pX) == 0) {
+                        currentMap->setPos(pY, pX, 3);
+                        wattron(currentMap->getWin(), COLOR_PAIR(3));
+                        currentMap->RedrawCell(pY, pX);      
+                        wattroff(currentMap->getWin(), COLOR_PAIR(3));
                     }
                 }
-
-                // 2. Usa i getter per le coordinate della porta
-                int pY = currentMap->getPortaY();
-                int pX = currentMap->getPortaX();
-
-                int playerY = p->getY(); 
-                int playerX = p->getX();
-                int valoreCellaPorta = currentMap->GetPos(pY, pX);
-                
-                // --- RECUPERO STATISTICHE DEI POWERUP ---
-                int maxBmb = p->getMaxBombs();
-                int raggio = p->getBombRange();
-                int passMuri = p->hasWallPass(); // 1 = Vero, 0 = Falso
-
-                // 3. Stampa il menu di debug aggiornato e compatto
-                mvprintw(0, 0, "DBG | TuttiMorti: %d | Porta(Y:%d X:%d Val:%d) | P(Y:%d X:%d) | Bmb:%d Rgg:%d Muri:%d    ", 
-                        tuttiMorti, pY, pX, valoreCellaPorta, playerY, playerX, maxBmb, raggio, passMuri);
-                        
-                refresh();
-
-                // 4. Fai apparire la porta
-                if (tuttiMorti == true && currentMap->GetPos(pY, pX) == 0) {
-                    currentMap->setPos(pY, pX, 3);       // Piazza la porta nella matrice
-                    
-                    // Accende il colore 4 (quello che hai assegnato alla porta)
-                    wattron(currentMap->getWin(), COLOR_PAIR(3));
-                    
-                    // Ridisegna la cella, che ora prenderà il colore attivo
-                    currentMap->RedrawCell(pY, pX);      
-                    
-                    // Spegne il colore per evitare che contamini il resto della finestra
-                    wattroff(currentMap->getWin(), COLOR_PAIR(3));
-                }
-                // ==========================================================
-                }
-            } // else (Fine logica in-game se non hai premuto ESC)
-        } // else(!inGame)
-    } // while(true) 
-} //run()
+            }
+        }
+    }
+}

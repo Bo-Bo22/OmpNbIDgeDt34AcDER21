@@ -10,9 +10,6 @@ MainMenu::MainMenu(int MaxY, int MaxX) :
     ldrBoard(stdscr, MaxY/2, (MaxX - 20) / 2, 1, 4, 20, "LEADERBOARD"),
     exitBtn(stdscr, MaxY/2 + 4, (MaxX - 20) / 2, 1, 8, 20, "ESCI") 
 {
-    // Inizializza lo stato del menu e dei bottoni usando una lista concatenata circolare
-    currentPage = MenuPage::MAIN;
-    selectedOption = 0;
     
     //sono variabili membri della classe definite nell'header e non variabili temporanee create sul momento.
     n1 = new lista_cmd{&play, NULL, NULL};

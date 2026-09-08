@@ -11,13 +11,6 @@ class Map;
 // Enumerazione esplicitamente concessa dalle specifiche per gestire le direzioni
 enum class Direction { UP, DOWN, RIGHT, LEFT };
 
-// Struttura ausiliaria per coordinate e valori
-struct cursore {
-    int x, y;
-    int val;
-};
-typedef cursore* pcurs;
-
 // ============================================================================
 // Classe base: Enemy
 // ============================================================================
@@ -27,7 +20,6 @@ protected:
     char character;         // Carattere ASCII usato per renderizzare il nemico (es. 'E', 'R', 'C')
     WINDOW *curwin;         // Puntatore alla finestra ncurses su cui disegnare
     bool alive;             // Flag di stato: indica se il nemico è vivo o è stato eliminato
-    int speed;              // Parametro di velocità
     Direction Dir;          // Direzione attuale di marcia del nemico
     
     // Gestione temporale nativa C++ per evitare l'uso di thread esterni vietati
@@ -38,12 +30,6 @@ protected:
 public:
     // Costruttore della classe base
     Enemy(int x, int y, char c, WINDOW *win, Direction dir, int cp);
-    
-    // Primitives di movimento predittivo
-    bool mvup(Map &Mappa);
-    bool mvdown(Map &Mappa);
-    bool mvright(Map &Mappa);
-    bool mvleft(Map &Mappa);
     
     // Getters stabili in sola lettura
     int getX() const;

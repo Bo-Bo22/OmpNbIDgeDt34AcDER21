@@ -7,8 +7,10 @@ crea il file e la classe per settare la BFS
 Inserire un timer per il countdown dei powerups
 
 
-Fixa tutte queste paroline: static, const, continue, auto
+Fixa tutte queste paroline: static, const, continue
 Osserva meglio come funziona la leaderboard
+Rimuovi la porta al livello successivo
+Metti anche che i nemici chaser non ti chasano quando sei nella safe zone
 
 
 Leggi bene le modifiche ai bottoni per quando cambiano dimensione da schiacciati

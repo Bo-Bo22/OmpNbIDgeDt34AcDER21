@@ -10,7 +10,6 @@ class Player;
 
 class ChaserEnemy : public Enemy {
 protected:
-    std::chrono::steady_clock::time_point lastMove;
 
 public:
     ChaserEnemy(int startX, int startY, char sym, WINDOW* win, Direction dir, int moveInterval, int cp);

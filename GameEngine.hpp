@@ -21,18 +21,14 @@ class GameEngine {
 protected:
     int yMax, xMax;
     bool inGame;
-    
+
+    UIManager ui;
     LevelManager manager;
     Map* currentMap;
     Player* p;
-    
-    // Gestione Bombe
-    static const int MAX_BOMBE = 3;
-    Bomb* bombeAttive[MAX_BOMBE];
-    
-    // Gestione Nemici (Predisposizione)
-    static const int MAX_NEMICI = 10;
-    Enemy* arrayNemici[MAX_NEMICI];
+    Bomb* bombeAttive[6];
+
+    Enemy* arrayNemici[10];
     int numeroNemici;
 
     Enemy* nemiciPerLivello[50][30]; 

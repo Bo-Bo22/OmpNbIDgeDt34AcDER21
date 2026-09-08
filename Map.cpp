@@ -2,14 +2,26 @@
 
 // Costruttore: crea una finestra per la mappa e la centra sullo schermo
 Map::Map(int yMax) {
+
+    righe = MAP_RIGHE; // Altezza della mappa
+    colonne = MAP_COLONNE; // Larghezza della mappa
+
+    legenda[0] = ' ';
+    legenda[1] = '#';
+    legenda[2] = '+';
+    legenda[3] = '>';
+    legenda[4] = '<';
+    legenda[5] = '$';
+
     // Calcola le coordinate per centrare la mappa
-    UIManager::getCenterCoordinates(colonne, righe, startY, startX);
+    UIManager ui;
+    ui.getCenterCoordinates(colonne, righe, startY, startX);
     
     // Crea la finestra della mappa
     playwin = newwin(righe, colonne, startY, startX);
     
     // Applica il background nero alla finestra
-    UIManager::setBlackBackground(playwin);
+    ui.setBlackBackground(playwin);
     
     // Disegna il bordo della finestra
     box(playwin, 0, 0);
@@ -22,7 +34,6 @@ Map::Map(int yMax) {
     }
 
     NLivello = 0;  // Inizializza il numero del livello
-
     portaY = 3; // Coordinate di sicurezza (se non ci fossero muri)
     portaX = 3;
 }
@@ -31,7 +42,7 @@ Map::Map(int yMax) {
 // Parametri: livelloReale (numero del livello)
 // Inizializza la mappa di un livello con muri, porte e cornice
 void Map::initmap(int livelloReale) {
-    this->NLivello = livelloReale;
+    NLivello = livelloReale;
     srand(NLivello + 22);
     int NumeroMuriDis = 0;
 
@@ -145,15 +156,13 @@ void Map::initmap(int livelloReale) {
             int rx = 1 + rand() % (colonne - 2);
             
             // controllo per evitare le coordinate della porta
-            if (map[ry][rx] == 2 && oggettiNascosti[ry][rx] == 0 && (ry != this->portaY || rx != this->portaX)) {
+            if (map[ry][rx] == 2 && oggettiNascosti[ry][rx] == 0 && (ry != portaY || rx != portaX)) {
                 
                 oggettiNascosti[ry][rx] = 5; // Nascondiamo l'oggetto
                 piazzato = true;
             }
         }
     }
-
-    map[3][3] = 3;  
     
 
 }
@@ -215,7 +224,8 @@ void Map::renderPos(int y, int x){
     }
 }
 
-// Funzione che permette di modificare i valori della matrice di livello.
+// Imposta il valore logico di una specifica cella della griglia verificando
+// preventivamente che le coordinate ricadano nei limiti fisici della matrice.
 void Map::setPos(int y, int x, int val) {
     // Controllo di sicurezza per evitare di scrivere fuori dalla memoria della mappa
     if (y >= 0 && y < righe && x >= 0 && x < colonne) {
@@ -244,9 +254,9 @@ int Map::getPortaX() { return portaX; }
 
 int Map::getOggettoNascosto(int y, int x) {return oggettiNascosti[y][x]; }
 
-int Map::getWidth() { return colonne; }
+int Map::getWidth() const { return colonne; }
 
-int Map::getHeight() { return righe; }
+int Map::getHeight() const { return righe; }
 
 // Ritorna il puntatore alla finestra di ncurses della mappa
 WINDOW* Map::getWin() {
@@ -263,7 +273,7 @@ int Map::GetLvlN() {
     return NLivello;
 }
 
-// Ritorna il carattere da visualizzare per una cella specifica
+// Restituisce la rappresentazione a carattere ASCII associata al valore numerico della cella.
 char Map::GetMapChar(int y, int x) {
     if (y < 0 || y >= righe || x < 0 || x >= colonne) {
         return ' ';

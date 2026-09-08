@@ -1,7 +1,7 @@
-#include <ncurses.h>
 #ifndef LEVELMANAGER_HPP
 #define LEVELMANAGER_HPP
 
+#include <ncurses.h>
 #include "Map.hpp"
 
 struct LivelloNode {
@@ -10,23 +10,19 @@ struct LivelloNode {
     LivelloNode* prev;
     LivelloNode* next;
 };
-typedef LivelloNode *ListaLivelli;
+typedef LivelloNode* ListaLivelli;
 
-class LevelManager{
-
+class LevelManager {
 protected:
-ListaLivelli H; //puntatore alla testa, Head
-ListaLivelli T; //puntatore alla coda, Tail
+    ListaLivelli H; // Puntatore alla testa (Head)
+    ListaLivelli T; // Puntatore alla coda (Tail)
 
 public:
+    LevelManager();
 
-LevelManager();
-
-
-Map& AddLevel(int livello, int Ymax);
-Map& nextLevel(int yMax);
-Map& prevLevel();
-
+    Map& AddLevel(int livello, int Ymax);
+    Map& nextLevel(int yMax);
+    Map& prevLevel();
 };
 
 #endif

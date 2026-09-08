@@ -5,25 +5,28 @@
 #include "Enemy.hpp"
 #include <ncurses.h>
 
+
+const int MAP_RIGHE = 20;
+const int MAP_COLONNE = 40;
+const int MAX_MURI_DISTRUTTIBILI = 700;
+
 class Map {
+
 protected:
-    static const int righe =20;  // Se metti static davanti a un membro non const, esiste una sola copia condivisa da tutti gli oggetti della classe.
-    static const int colonne = 40; 
+    int righe;
+    int colonne;
     int startX;
     int startY;
-    int map[righe][colonne];
+
+    int map[MAP_RIGHE][MAP_COLONNE];
+    int oggettiNascosti[MAP_RIGHE][MAP_COLONNE];
+    int* MuriDistruttibili[MAX_MURI_DISTRUTTIBILI]; // Array di puntatori per i muri distruttibili, ottimizzato a 20x40-(~100) = 700
+
     int NLivello;
-    static const int NMuriDistruttibili=50; //ho scelto arbitrariamente un numero di muri distruttibili che verranno aggiunti alla mappa (in questo momento sono 50 su 1225 celle totali)
-    static const int MaxMuriDistruttibili=2000;
-    int* MuriDistruttibili[MaxMuriDistruttibili];
     int portaY;
     int portaX;
-    int oggettiNascosti[20][40];
 
-    //legenda degli elementi della mappa.
-    char legenda[6] = {' ', '#', '+', '>', '<', // elementi basilari
-                      '$'};     // power-up
-
+    char legenda[6];
     WINDOW* playwin;
 
 public:
@@ -47,8 +50,8 @@ public:
 
     WINDOW* getWin();
     
-    static int getWidth();
-    static int getHeight();
+    int getWidth() const;
+    int getHeight() const;
 
 
     //funzione che disegna la mappa a partire dalla matrice map.

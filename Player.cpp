@@ -17,11 +17,15 @@ Player::Player(WINDOW* win, int y, int x, char c) {
     Score = 0; // Inizializziamo lo score del giocatore
 
     hitByExplosion = false; // Inizializziamo lo stato di colpito dall'esplosione
+
+    maxBombs = 3;
+    bombRange = 1;
+    wallPass = false;
 }
 
 // Aggiorna la finestra del giocatore e i suoi limiti massimi
 void Player::setWindow(WINDOW* win) {
-    this->curwin = win;
+    curwin = win;
     getmaxyx(curwin, yMax, xMax);  
     keypad(curwin, true);          
     nodelay(curwin, true);         
@@ -143,14 +147,6 @@ void Player::display() {
     wattroff(curwin, COLOR_PAIR(4));
 }
 
-// Ciclo di gioco: visualizza e aspetta input fino a 'x' (non usato nel progetto attuale)
-void Player::movement(WINDOW* PlayWin, Map &Mappa) {
-    do {
-        display();
-        wrefresh(PlayWin);
-    } while (getmv(Mappa) != 'x');  // Ferma il gioco quando si preme 'x'
-}
-
 // Ritorna true se il giocatore ha raggiunto il livello successivo
 bool Player::ReturnNextLevel() {
     return NextLevel;
@@ -179,7 +175,8 @@ void Player::resetPosition(){
     xLoc = 1;
 }
 
-// Morte con animazione (Lampeggio temporizzato con <chrono>)
+// Esegue il decremento dei punti ferita e gestisce l'effetto visivo di lampeggio
+// a intermittenza temporizzata accelerata prima di ripristinare il player allo spawn.
 int Player::Death(bool lampeggiante) {
     
     // Applichiamo il danno
@@ -229,7 +226,8 @@ int Player::Death(bool lampeggiante) {
     return Life;
 }
 
-// Cancella il giocatore dalla finestra (lo sostituisce con uno spazio)
+// Sovrascrive la cella corrente con uno spazio vuoto o ripristina il carattere
+// della mappa sottostante per non lasciare scie grafiche durante il moto.
 void Player::erase(Map &Mappa) {
     if((Mappa.GetMapChar(yLoc, xLoc)) == ' ') {
         mvwaddch(curwin, yLoc, xLoc, ' ');  // Cancella il giocatore se la cella è vuota
@@ -238,7 +236,7 @@ void Player::erase(Map &Mappa) {
     }
 }
 
-// Ridisegna il contenuto corretto della cella dopo lo spostamento del giocatore
+// Interroga la mappa e ridisegna sul terminale il glifo corretto per le coordinate fornite.
 void Player::redrawPreviousCell(Map &Mappa) {
     Mappa.RedrawCell(yLoc, xLoc);
 }
@@ -249,11 +247,6 @@ int Player::getX(){
 
 int Player::getY(){
     return yLoc;
-}
-
-int Player::LifeUp(){
-    if (Life>0) Life++;
-    return Life;
 }
 
 int Player::getLife(){
@@ -267,6 +260,7 @@ int Player::getScore() {
     return Score; 
 }
 
+// Ripristina parametri di base e potenziamenti ai valori predefiniti di inizio partita.
 void Player::resetStats() {
     Score = 0;
     Life = 3;
@@ -287,12 +281,15 @@ bool Player::getHitByExplosion() {
 void Player::addLife() { 
     Life++; 
 }
+
 void Player::addMaxBombs() { 
     maxBombs++; 
 }
+
 void Player::addBombRange() { 
     bombRange++; 
 }
+
 void Player::setWallPass(bool status) { 
     wallPass = status; 
 }
@@ -310,6 +307,7 @@ bool Player::hasWallPass() {
     return wallPass; 
 }
 
+// Riassegna i valori predefiniti ai soli power-up temporanei (raggio, bombe, passamuri).
 void Player::resetPowerups() {
     maxBombs = 3;
     bombRange = 1;

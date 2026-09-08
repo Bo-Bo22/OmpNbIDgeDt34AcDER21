@@ -1,6 +1,7 @@
 #include "Bomb.hpp"
 
-
+// Aggiorna lo stato temporale della bomba (fase innesco, fiammata, distruzione blocchi).
+// Ritorna true se un'entita' e' stata colpita durante questo ciclo di tick.
 bool Bomb::update(Map &Mappa, Player &Pl, Enemy** En, int n_nemici) {
 
     std::chrono::steady_clock::time_point now =  std::chrono::steady_clock::now();
@@ -14,9 +15,9 @@ bool Bomb::update(Map &Mappa, Player &Pl, Enemy** En, int n_nemici) {
     // =======================================================
     if (!exploding){
         // Controlla se è passato abbastanza tempo per innescare l'esplosione
-        if (std::chrono::duration_cast<std::chrono::seconds>(now - explod_time).count() >= exploding_time){
+        if (std::chrono::duration_cast<std::chrono::seconds>(now - explode_time).count() >= exploding_time){
             exploding = true;
-            explod_time = now;
+            explode_time = now;
         }
         // Fa lampeggiare l'icona della bomba (animazione)
         else if (std::chrono::duration_cast<std::chrono::milliseconds>(now - last_time_point).count() > blink_time){
@@ -73,8 +74,8 @@ bool Bomb::update(Map &Mappa, Player &Pl, Enemy** En, int n_nemici) {
                 if (direzione[k] == true){ 
 
                 // Blocca la fiamma se incontra un muro indistruttibile (1) 
-                // o un muro distruttibile (2) a meno che non ci sia il powerup 'flare_boost'
-                if (Mappa.GetPos(tY, tX) == 1 || (Mappa.GetPos(tY,tX) == 2 && !flare_boost)) { 
+                // o un muro distruttibile (2)
+                if (Mappa.GetPos(tY, tX) == 1 || (Mappa.GetPos(tY,tX) == 2)) { 
                     direzione[k] = false;
                 }
 
@@ -107,7 +108,7 @@ bool Bomb::update(Map &Mappa, Player &Pl, Enemy** En, int n_nemici) {
         // =======================================================
         
         // Se la fiamma è rimasta a schermo abbastanza tempo, ripuliamo
-        if (std::chrono::duration_cast<std::chrono::seconds>(now - explod_time).count() > elapsed){
+        if (std::chrono::duration_cast<std::chrono::seconds>(now - explode_time).count() > elapsed){
 
              for (int i = 0; i <= est_bombe; i++){
                 for (int k = 0; k < 4; k++) {
@@ -153,13 +154,10 @@ bool Bomb::update(Map &Mappa, Player &Pl, Enemy** En, int n_nemici) {
     }
 }
 
+// Segnala se l'ordigno si trova nello stato transitorio di detonazione attiva.
 bool Bomb::isExploding(){return exploding;}
 
-void Bomb::forceExplode(){
-    exploding = true;
-    explod_time = std::chrono::steady_clock::now();
-}
-
+// Indica se la bomba e' ancora attiva sulla scacchiera o pronta per la rimozione da memoria.
 bool Bomb::isActive(){
     return active;
 }
@@ -172,7 +170,9 @@ int Bomb::getX(){return xLoc;}
 
 int Bomb::getY(){return yLoc;}
 
-Bomb::Bomb(int x, int y, WINDOW* win, int estensione, bool fl_bst){
+// Costruttore: inizializza le coordinate, il raggio di propagazione delle fiamme
+// e azzera i timer cronometrici relativi al lampeggio e all'innesco della detonazione.
+Bomb::Bomb(int x, int y, WINDOW* win, int estensione){
     yLoc = y;
     xLoc = x;
     curwin = win;
@@ -180,12 +180,14 @@ Bomb::Bomb(int x, int y, WINDOW* win, int estensione, bool fl_bst){
     active = true;
     exploding = false;
     last_time_point = std::chrono::steady_clock::now();
-    explod_time = std::chrono::steady_clock::now();
-    display_tick = std::chrono::steady_clock::now();
-    delay = 2;
+    explode_time = std::chrono::steady_clock::now();
+
+    // Inizializzazione dell'array di direzione
+    for (int i = 0; i < 4; i++) {
+        direzione[i] = true;
+    }
 
     est_bombe = estensione;
-    flare_boost = fl_bst;
     
     getmaxyx(curwin, YMax, XMax);
 }

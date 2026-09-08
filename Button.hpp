@@ -13,11 +13,9 @@ class Button {
 protected:
 
     int y, x;
-    int y_str, x_str;
     int width;
     char label[32];
     ButtonState state;
-    WINDOW* win;
     WINDOW* btnWin; 
     bool blinkOn;
     int blinkTick;

@@ -4,7 +4,8 @@
 
 int main() {
     // Inizializza l'interfaccia e i colori[cite: 1]
-    UIManager::initializeUI();
+    UIManager ui;
+    ui.initializeUI();
     keypad(stdscr, TRUE);
 
     int termY, termX;

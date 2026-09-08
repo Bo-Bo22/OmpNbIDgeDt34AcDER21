@@ -22,17 +22,17 @@ struct QueueNode {
 };
 
 struct Queue {
-    QueueNode* head = nullptr;
-    QueueNode* tail = nullptr;
+    QueueNode* head = NULL;
+    QueueNode* tail = NULL;
 };
 
-static void enqueue(Queue &q, int x, int y) {
+void enqueue(Queue &q, int x, int y) {
     QueueNode* tmp = new QueueNode;
     tmp->x = x;
     tmp->y = y;
-    tmp->next = nullptr;
+    tmp->next = NULL;
     
-    if (q.head == nullptr) {
+    if (q.head == NULL) {
         q.head = tmp;
         q.tail = tmp;
     } else {
@@ -41,12 +41,12 @@ static void enqueue(Queue &q, int x, int y) {
     }
 }
 
-static void dequeue(Queue &q) {
-    if (q.head == nullptr) return;
+void dequeue(Queue &q) {
+    if (q.head == NULL) return;
     QueueNode* tmp = q.head;
     q.head = q.head->next;
     
-    if (q.head == nullptr) q.tail = nullptr;
+    if (q.head == NULL) q.tail = NULL;
     delete tmp;
 }
 
@@ -54,25 +54,24 @@ struct connect {
     int x, y;
 };
 
-// ============================================================================
-// ALGORITMO DI VISITA IN AMPIEZZA (BFS)
-// ============================================================================
+// Visita in ampiezza (Breadth-First Search) su matrice di adiacenza per calcolare
+// il percorso minimo verso il player. L'albero dei cammini viene memorizzato
+// nell'array bidimensionale 'parent' e risalito a ritroso (backtracking) dal target
+// per estrarre la singola direzione ortogonale ottimale del prossimo passo.
 Direction ChaserEnemy::calcolaBFS(Player &Pl, Map &Mappa) {
-    const int MAX_Y = 100;
-    const int MAX_X = 150;
     
-    int visited[MAX_Y][MAX_X] = {};     
-    connect parent[MAX_Y][MAX_X];       
+    int visited[MAP_RIGHE][MAP_COLONNE] = {};     
+    connect parent[MAP_RIGHE][MAP_COLONNE];       
     Direction dirs[4] = {Direction::UP, Direction::DOWN, Direction::LEFT, Direction::RIGHT};
     
     int dy[4] = {-1, 1, 0, 0};
     int dx[4] = {0, 0, -1, 1};
     
-    int h = Map::getHeight();
-    int w = Map::getWidth();
+    int h = Mappa.getHeight();
+    int w = Mappa.getWidth();
 
-    for (int i = 0; i < h && i < MAX_Y; i++) {
-        for (int j = 0; j < w && j < MAX_X; j++) {
+    for (int i = 0; i < h && i < 100; i++) {
+        for (int j = 0; j < w && j < 150; j++) {
             parent[i][j].x = -1;
             parent[i][j].y = -1;
             visited[i][j] = 0;
@@ -85,7 +84,7 @@ Direction ChaserEnemy::calcolaBFS(Player &Pl, Map &Mappa) {
     
     bool found = false;
     
-    while (q.head != nullptr && !found) {
+    while (q.head != NULL && !found) {
         int cx = q.head->x;
         int cy = q.head->y;
         dequeue(q);    
@@ -111,7 +110,7 @@ Direction ChaserEnemy::calcolaBFS(Player &Pl, Map &Mappa) {
         }
     }
     
-    while (q.head != nullptr) dequeue(q);
+    while (q.head != NULL) dequeue(q);
     
     if (!found) return dirs[rand() % 4];
     
@@ -155,29 +154,29 @@ void ChaserEnemy::update(Map &Mappa, Player &pl) {
 // POSIZIONAMENTO CASUALE LONTANO DALLO SPAWN
 // ============================================================================
 void ChaserEnemy::spawna_casuale(Map &Mappa, Enemy** altri, int n) {
-    int h = Map::getHeight();
-    int w = Map::getWidth();
+    int h = Mappa.getHeight();
+    int w = Mappa.getWidth();
     bool piazzato = false;
     
     while (!piazzato) {
         int ry = rand() % (h - 2) + 1;
         int rx = rand() % (w - 2) + 1;
         
-        // Evita la safe zone (3x5 in alto a sinistra)
-        if (ry <= 3 && rx <= 5) continue;
-        
-        if (Mappa.GetPos(ry, rx) == 0) {
-            bool occupato = false;
-            for (int i = 0; i < n; i++) {
-                if (altri[i] != nullptr && altri[i]->getX() == rx && altri[i]->getY() == ry) {
-                    occupato = true;
-                    break;
+            // Controlla che le coordinate siano al di fuori della safe zone iniziale (3x5)
+        if (ry > 3 || rx > 5) {
+            if (Mappa.GetPos(ry, rx) == 0) {
+                bool occupato = false;
+                for (int i = 0; i < n; i++) {
+                    if (altri[i] != NULL && altri[i]->getX() == rx && altri[i]->getY() == ry) {
+                        occupato = true;
+                        break;
+                    }
                 }
-            }
-            if (!occupato) {
-                XLoc = rx;
-                YLoc = ry;
-                piazzato = true;
+                if (!occupato) {
+                    XLoc = rx;
+                    YLoc = ry;
+                    piazzato = true;
+                }
             }
         }
     }

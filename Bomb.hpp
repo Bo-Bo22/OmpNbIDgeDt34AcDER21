@@ -24,17 +24,16 @@ protected:
     bool exploding;
 
     std::chrono::time_point<std::chrono::steady_clock> last_time_point;
-    std::chrono::time_point<std::chrono::steady_clock> explod_time;
+    std::chrono::time_point<std::chrono::steady_clock> explode_time;
     std::chrono::time_point<std::chrono::steady_clock> display_tick;
     int delay;  
 
     //per gestire gli item
     int est_bombe;
-    bool flare_boost;
 
 public:
 
-    Bomb(int x, int y, WINDOW* win, int estensione, bool fl_bst);
+    Bomb(int x, int y, WINDOW* win, int estensione);
 
     int getX();
     int getY();
@@ -42,10 +41,9 @@ public:
     bool update(Map &Mappa, Player &Pl, Enemy** En, int n_nemici);
 
     //mi permette di controllare il tipo di esplosione, perforante o meno
-    bool direzione[4] = {true, true, true, true};
+    bool direzione[4];
 
 
-    void forceExplode();
     bool isExploding();
 
     void display();
